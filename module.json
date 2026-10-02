@@ -1,0 +1,15 @@
+{
+  "id": "embervault.content-creator",
+  "name": "Content Creator",
+  "version": "0.1.0",
+  "publisher": "EmberVault",
+  "minimum_core_version": "1.0.0",
+  "capabilities": ["content.design", "content.furniture", "content.export"],
+  "feature_state": "experimental",
+  "process_mode": "embedded",
+  "entrypoint": "src/module.py",
+  "contract_version": 1,
+  "safety": {"read_only": false, "requires_backup": false, "allowed_profiles": ["default", "research"]},
+  "recovery": {"rollback": "Discard the design manifest; no live game files are touched.", "verification": "Exported content remains a design-only manifest with relative asset references."},
+  "operation_types": ["content-design", "content-validation", "content-export"]
+}
