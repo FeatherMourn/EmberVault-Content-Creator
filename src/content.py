@@ -289,6 +289,32 @@ def bed_template() -> FurnitureProject:
     )
 
 
+def prepare_bed_vertical_slice(destination: Path, package_files: list[str] | None = None) -> dict:
+    """Run the complete offline bed workflow and write reviewable artifacts."""
+    project = bed_template()
+    project.set_blender_handoff(
+        "https://github.com/Baik90/EnshroudedBlenderTools", "0.25.0", "5.2 LTS",
+        "1076226", ["bed-render-model"], package_files or ["mod.json", "validation.json", "render_data.bin", "src/mod.lua"],
+    )
+    project.add_evidence(
+        "Bed donor and Blender handoff", "EmberVault bed workflow and EnshroudedBlenderTools",
+        state="partial", game_build="1076226", evidence_scope="offline package preparation",
+    )
+    package_issues = project.validate_blender_package(project.blender_handoff["package_files"])
+    root = Path(destination)
+    root.mkdir(parents=True, exist_ok=True)
+    project_path = project.save(root / "bed-project.json")
+    manifest_path = project.export(root / "bed-export.json")
+    return {
+        "project": project,
+        "project_path": project_path,
+        "manifest_path": manifest_path,
+        "preview": project.preview(),
+        "review": project.export_review(),
+        "package_issues": package_issues,
+    }
+
+
 def create_furniture_project(name: str, category: str = "bed") -> FurnitureProject:
     """Create a guided furniture project without accessing game resources."""
     name = name.strip()
