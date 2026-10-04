@@ -10,7 +10,8 @@ from src.content import (BlueprintLibrary, bed_template, create_furniture_projec
                          audit_package_security, import_generated_package,
                          prepare_bed_vertical_slice,
                          reproducibility_report, validate_export_contract,
-                         simulate_registration, validate_guid_collisions)
+                         simulate_registration, validate_guid_collisions,
+                         package_preview, capability_matrix)
 
 
 class ContentCreatorTests(unittest.TestCase):
@@ -20,6 +21,15 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertEqual(fixture["target"]["vertex_count"], 288)
         self.assertEqual(fixture["evidence_state"]["package_generation"], "verified")
         self.assertEqual(fixture["evidence_state"]["in_game_installation"], "unverified")
+
+    def test_garden_table_fixture_expands_new_item_coverage(self):
+        fixture = json.loads((Path(__file__).parent / "fixtures" / "garden_table.reference.json").read_text(encoding="utf-8"))
+        project = create_furniture_project("Garden Table", "table")
+        project.apply_reference_fixture(fixture)
+        self.assertEqual(project.workflow_mode, "new-model")
+        self.assertEqual(project.category, "table")
+        self.assertEqual(project.base_template_guid, "fixture-table-template")
+        self.assertEqual(project.verification["in_game_installation"], "unverified")
 
     def test_armchair_fixture_populates_new_model_workflow(self):
         fixture = json.loads((Path(__file__).parent / "fixtures" / "medieval_armchair.reference.json").read_text(encoding="utf-8"))
@@ -245,6 +255,26 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertIn("item_creation", result["actions"])
         self.assertFalse(result["executed"])
 
+    def test_package_preview_exposes_new_item_and_icon_state(self):
+        preview = package_preview({
+            "item_name": "Medieval Armchair",
+            "new_model": True,
+            "model_name": "global_props_roughwood_chair_01_a",
+            "vertex_count": 288,
+            "item_icon": {"file": "item_icon.png"},
+            "base_item_guid": "item",
+            "base_template_guid": "template",
+        })
+        self.assertTrue(preview["new_model"])
+        self.assertEqual(preview["icon"], "item_icon.png")
+        self.assertTrue(preview["base_item_guid_present"])
+
+    def test_capability_matrix_separates_offline_support_from_runtime(self):
+        matrix = capability_matrix("table", "new-model")
+        self.assertTrue(matrix["offline"]["authoring"])
+        self.assertTrue(matrix["offline"]["package_validation"])
+        self.assertEqual(matrix["runtime"]["registration"], "unverified")
+
     def test_public_record_excludes_private_evidence_sources(self):
         with TemporaryDirectory() as folder:
             project = bed_template()
@@ -257,6 +287,8 @@ class ContentCreatorTests(unittest.TestCase):
         project = bed_template()
         record = BlueprintLibrary(Path("." )).public_record(project)
         self.assertEqual(BlueprintLibrary.validate_public_record(record), [])
+        self.assertEqual(record["authorship_state"], "creator-declared")
+        self.assertIn("license", record)
 
     def test_blueprint_library_filters_by_evidence_state(self):
         with TemporaryDirectory() as folder:

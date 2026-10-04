@@ -1,0 +1,23 @@
+{
+  "fixture_id": "garden-table-new-model-template",
+  "fixture_kind": "new-model-template",
+  "source_label": "offline fixture template",
+  "target": {
+    "model_name": "global_props_roughwood_table_01_a",
+    "target_guid": "fixture-table-target",
+    "base_template_guid": "fixture-table-template",
+    "base_item_guid": "fixture-table-item",
+    "vertex_count": 288,
+    "index_count": 288,
+    "full_topology": true
+  },
+  "evidence_state": {
+    "package_generation": "fixture",
+    "package_structure": "fixture",
+    "in_game_installation": "unverified",
+    "visuals": "unverified",
+    "placement": "unverified",
+    "persistence": "unverified",
+    "multiplayer": "unverified"
+  }
+}

@@ -147,6 +147,43 @@ def simulate_registration(lua_source: str) -> dict:
     return {"actions": [key for key, present in markers.items() if present], "missing": [key for key, present in markers.items() if not present], "executed": False}
 
 
+def package_preview(metadata: dict) -> dict:
+    """Return a UI-safe summary of generated package metadata."""
+    return {
+        "item_name": metadata.get("item_name", "unknown"),
+        "new_model": metadata.get("new_model", False),
+        "target_model": metadata.get("model_name", "unknown"),
+        "vertex_count": metadata.get("vertex_count", 0),
+        "icon": metadata.get("item_icon", {}).get("file") if isinstance(metadata.get("item_icon"), dict) else None,
+        "base_item_guid_present": bool(metadata.get("base_item_guid")),
+        "base_template_guid_present": bool(metadata.get("base_template_guid")),
+    }
+
+
+def capability_matrix(category: str, workflow_mode: str) -> dict:
+    """Describe supported offline work separately from unverified runtime behavior."""
+    supported_categories = category in SUPPORTED_FURNITURE_CATEGORIES
+    supported_workflow = workflow_mode in {"replacement", "new-model", "donor-preserving-clone"}
+    return {
+        "category": category,
+        "workflow_mode": workflow_mode,
+        "offline": {
+            "authoring": supported_categories,
+            "save_load": True,
+            "preview": True,
+            "package_validation": supported_workflow,
+            "catalog_record": supported_categories and supported_workflow,
+        },
+        "runtime": {
+            "registration": "unverified",
+            "crafting": "unverified",
+            "placement": "unverified",
+            "persistence": "unverified",
+            "multiplayer": "unverified",
+        },
+    }
+
+
 class BlueprintLibrary:
     """Local, design-only library of reusable Content Creator projects."""
 
@@ -223,6 +260,9 @@ class BlueprintLibrary:
             "workflow_mode": project.workflow_mode,
             "description": project.description,
             "tags": [project.category, project.workflow_mode],
+            "publisher": "EmberVault Content Creator",
+            "authorship_state": "creator-declared",
+            "license": "not-declared",
             "preview_hash": preview["preview_hash"],
             "evidence_state": "review-required" if issues else "reviewed",
             "review_issues": issues,
