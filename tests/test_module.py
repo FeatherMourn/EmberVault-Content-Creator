@@ -6,8 +6,9 @@ from tempfile import TemporaryDirectory
 from embervault_sdk import ModuleContext
 from src.module import validate_design
 from src.content import (BlueprintLibrary, bed_template, create_furniture_project,
-                         import_package_metadata, prepare_bed_vertical_slice,
-                         validate_export_contract)
+                         compare_package_metadata, import_package_metadata,
+                         prepare_bed_vertical_slice, reproducibility_report,
+                         validate_export_contract, validate_guid_collisions)
 
 
 class ContentCreatorTests(unittest.TestCase):
@@ -202,6 +203,19 @@ class ContentCreatorTests(unittest.TestCase):
             self.assertIn("mod.json", metadata["files"])
             self.assertFalse(metadata["executed"])
             self.assertFalse(metadata["installed"])
+
+    def test_package_diff_and_guid_collision_checks_are_offline(self):
+        self.assertTrue(compare_package_metadata({"new_model": False}, {"new_model": True})["changed"])
+        self.assertIn("custom_item_guid collides", " ".join(validate_guid_collisions({"custom_item_guid": "known"}, {"known"})))
+
+    def test_reproducibility_report_hashes_package_files(self):
+        with TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root / "mod.json").write_text("{}", encoding="utf-8")
+            report = reproducibility_report(root, {"new_model": True}, {"blender": "5.2.2"})
+            self.assertIn("mod.json", report["files"])
+            self.assertTrue(report["files"]["mod.json"]["sha256"])
+            self.assertFalse(report["live_game_files_touched"])
 
     def test_public_record_excludes_private_evidence_sources(self):
         with TemporaryDirectory() as folder:

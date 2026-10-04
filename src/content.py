@@ -47,6 +47,37 @@ def import_package_metadata(package_root: Path) -> dict:
     return {"source": str(root), "files": imported, "executed": False, "installed": False}
 
 
+def validate_guid_collisions(metadata: dict, vanilla_guids: set[str] | None = None) -> list[str]:
+    """Check new-item metadata for accidental reuse of known identities."""
+    vanilla = {value.lower() for value in (vanilla_guids or set())}
+    issues = []
+    for key in ("custom_item_guid", "custom_recipe_guid", "custom_template_guid"):
+        value = str(metadata.get(key, "")).lower()
+        if value and value in vanilla:
+            issues.append(f"{key} collides with a known identity.")
+    if metadata.get("new_model") is True and str(metadata.get("base_item_guid", "")).lower() == str(metadata.get("target_guid", "")).lower():
+        issues.append("New-model base item and target GUID must be distinct.")
+    return issues
+
+
+def compare_package_metadata(left: dict, right: dict) -> dict:
+    keys = sorted(set(left) | set(right))
+    changed = {key: {"left": left.get(key), "right": right.get(key)} for key in keys if left.get(key) != right.get(key)}
+    return {"changed": changed, "same": not changed}
+
+
+def reproducibility_report(package_root: Path, metadata: dict, tool_versions: dict) -> dict:
+    root = Path(package_root)
+    files = {}
+    for path in sorted(root.rglob("*")):
+        if path.is_file():
+            files[str(path.relative_to(root).as_posix())] = {
+                "size": path.stat().st_size,
+                "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            }
+    return {"metadata": metadata, "tool_versions": dict(tool_versions), "files": files, "live_game_files_touched": False}
+
+
 class BlueprintLibrary:
     """Local, design-only library of reusable Content Creator projects."""
 
