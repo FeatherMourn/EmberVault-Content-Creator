@@ -66,7 +66,7 @@ class BlueprintLibrary:
             except (OSError, json.JSONDecodeError):
                 previous = {}
         versions = list(previous.get("blueprint", {}).get("versions", []))
-        version = len(versions) + 1
+        version = int(previous.get("blueprint", {}).get("version", 0)) + 1
         if previous:
             versions.append({"version": version - 1, "preview_hash": previous.get("blueprint", {}).get("preview_hash", "")})
         record["blueprint"] = {

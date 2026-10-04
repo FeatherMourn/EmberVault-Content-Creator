@@ -5,7 +5,9 @@ from tempfile import TemporaryDirectory
 
 from embervault_sdk import ModuleContext
 from src.module import validate_design
-from src.content import bed_template, create_furniture_project, prepare_bed_vertical_slice, validate_export_contract
+from src.content import (BlueprintLibrary, bed_template, create_furniture_project,
+                         import_package_metadata, prepare_bed_vertical_slice,
+                         validate_export_contract)
 
 
 class ContentCreatorTests(unittest.TestCase):
@@ -161,6 +163,36 @@ class ContentCreatorTests(unittest.TestCase):
             self.assertEqual(result["preview"]["application_state"], "design-only")
             self.assertFalse(result["review"]["ready"])
             self.assertIn("Unverified or partial verification areas remain open.", result["review"]["issues"])
+
+    def test_blueprint_library_versions_and_duplicates_projects(self):
+        with TemporaryDirectory() as folder:
+            library = BlueprintLibrary(Path(folder))
+            project = bed_template()
+            library.save(project, ["bed", "replacement"])
+            project.description = "Updated design"
+            library.save(project, ["bed", "updated"])
+            results = library.search("updated")
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0]["record"]["blueprint"]["version"], 2)
+            duplicate = library.duplicate(results[0]["path"])
+            self.assertNotEqual(duplicate.project_id, project.project_id)
+
+    def test_safe_metadata_import_reads_json_only(self):
+        with TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root / "mod.json").write_text('{"name": "offline"}', encoding="utf-8")
+            metadata = import_package_metadata(root)
+            self.assertIn("mod.json", metadata["files"])
+            self.assertFalse(metadata["executed"])
+            self.assertFalse(metadata["installed"])
+
+    def test_public_record_excludes_private_evidence_sources(self):
+        with TemporaryDirectory() as folder:
+            project = bed_template()
+            project.add_evidence("Private note", "C:/private/research/source.txt")
+            record = BlueprintLibrary(Path(folder)).public_record(project)
+            self.assertEqual(record["application_state"], "design-only")
+            self.assertNotIn("private", json.dumps(record).lower())
 
 
 if __name__ == "__main__":
