@@ -133,6 +133,20 @@ def audit_package_security(package_root: Path, max_file_size: int = 50_000_000) 
     return issues
 
 
+def simulate_registration(lua_source: str) -> dict:
+    """Describe expected registration actions from Lua without executing it."""
+    markers = {
+        "render_model_creation": "create_resource(source_resource.data, MODEL_TYPE)" in lua_source,
+        "template_creation": "create_resource(source_template.data" in lua_source,
+        "item_creation": "create_resource(source_item.data" in lua_source,
+        "item_registry_append": "item_registry.data.itemRefs" in lua_source,
+        "recipe_registry_creation": "RecipeRegistryResource" in lua_source and "create_resource(" in lua_source,
+        "recipe_output_rebind": "output.itemRef = custom_item" in lua_source,
+        "localization_creation": "custom_name_loca" in lua_source and "custom_description_loca" in lua_source,
+    }
+    return {"actions": [key for key, present in markers.items() if present], "missing": [key for key, present in markers.items() if not present], "executed": False}
+
+
 class BlueprintLibrary:
     """Local, design-only library of reusable Content Creator projects."""
 

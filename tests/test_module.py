@@ -10,7 +10,7 @@ from src.content import (BlueprintLibrary, bed_template, create_furniture_projec
                          audit_package_security, import_generated_package,
                          prepare_bed_vertical_slice,
                          reproducibility_report, validate_export_contract,
-                         validate_guid_collisions)
+                         simulate_registration, validate_guid_collisions)
 
 
 class ContentCreatorTests(unittest.TestCase):
@@ -239,6 +239,11 @@ class ContentCreatorTests(unittest.TestCase):
             (root / "unexpected.exe").write_bytes(b"not executed")
             issues = audit_package_security(root)
             self.assertTrue(any("Unexpected package file" in issue for issue in issues))
+
+    def test_registration_simulator_is_static_only(self):
+        result = simulate_registration("game.assets.create_resource(source_item.data, 'keen::ItemInfo'); item_registry.data.itemRefs")
+        self.assertIn("item_creation", result["actions"])
+        self.assertFalse(result["executed"])
 
     def test_public_record_excludes_private_evidence_sources(self):
         with TemporaryDirectory() as folder:
