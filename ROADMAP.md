@@ -68,11 +68,28 @@ promotion of research into working game content.
     including registration evidence and unresolved visual/runtime questions.
 21. [ ] Add GitHub backup and a reviewable release artifact for the completed
     bed vertical slice.
+22. [ ] Define an adapter boundary for external tools and keep Blender Tools
+    integration replaceable.
+23. [ ] Add reference fixtures for bed creation, furniture replacement, and
+    new-model workflows.
+24. [ ] Define a capability matrix for each content type and workflow.
+25. [ ] Add deterministic package hashes and export manifests.
+26. [ ] Add project migration tooling for contract and schema changes.
+27. [ ] Add undo, redo, and operation history for authoring decisions.
+28. [ ] Add preview thumbnails and before/after comparison snapshots.
+29. [ ] Add an explicit offline mode when game resources or external tools are
+    unavailable.
+30. [ ] Add structured logs for validation, handoff, export, and recovery.
+31. [ ] Add a review checklist before a package can be marked ready.
+32. [ ] Add compatibility warnings for Blender, game-build, and tool-version
+    mismatches.
+33. [ ] Build a corpus of valid, invalid, incomplete, and contradictory project
+    fixtures.
 
 ### Later promotion work
 
-22. [ ] Publish only sanitized, review-approved exports to EmberVault Web.
-23. [ ] Add runtime adapters only when current-build evidence proves behavior,
+34. [ ] Publish only sanitized, review-approved exports to EmberVault Web.
+35. [ ] Add runtime adapters only when current-build evidence proves behavior,
     persistence, multiplayer impact, and rollback.
 
 ## Definition of done
@@ -88,5 +105,8 @@ promotion of research into working game content.
 - [ ] Projects persist safely across saves, loads, and version changes.
 - [ ] Control Center lifecycle integration is verified.
 - [ ] Runtime claims remain separate from static Blender/package evidence.
+- [ ] External-tool adapters, fixtures, capability matrix, hashes, migrations,
+      history, previews, offline mode, logs, review checks, compatibility
+      warnings, and the test corpus are implemented.
 - [ ] Tests, documentation, and package verification pass.
 - [ ] Changes are committed and pushed.
