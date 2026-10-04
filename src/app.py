@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QWidget,
 )
 
-from .content import BlueprintLibrary, FurnitureProject, bed_template, search_donor_library
+from .content import BlueprintLibrary, FurnitureProject, bed_template, import_package_metadata, search_donor_library
 
 
 class ContentCreatorWindow(QMainWindow):
@@ -61,9 +61,12 @@ class ContentCreatorWindow(QMainWindow):
         self.blueprint_results.itemClicked.connect(self._select_blueprint)
         save_blueprint = QPushButton("Save current project as blueprint")
         save_blueprint.clicked.connect(self.save_blueprint)
+        import_metadata = QPushButton("Import safe package metadata")
+        import_metadata.clicked.connect(self.import_metadata)
         blueprint_layout.addWidget(self.blueprint_search)
         blueprint_layout.addWidget(self.blueprint_results)
         blueprint_layout.addWidget(save_blueprint)
+        blueprint_layout.addWidget(import_metadata)
         layout.addWidget(blueprints)
 
         furniture = QGroupBox("Furniture workspace")
@@ -245,6 +248,18 @@ class ContentCreatorWindow(QMainWindow):
             self.status.setText(f"Blueprint saved: {destination.name}")
         except ValueError as exc:
             self.status.setText("Blueprint blocked: " + str(exc))
+
+    def import_metadata(self) -> None:
+        source = QFileDialog.getExistingDirectory(self, "Select package metadata folder")
+        if not source:
+            return
+        try:
+            metadata = import_package_metadata(Path(source))
+            self.project.add_evidence("Imported package metadata", str(source), state="observed")
+            self.status.setText(f"Imported {len(metadata['files'])} safe metadata file(s); no code was executed or installed.")
+            self._update_inline_validation()
+        except ValueError as exc:
+            self.status.setText("Metadata import blocked: " + str(exc))
 
     def _update_project_summary(self) -> None:
         if not self.project.name:

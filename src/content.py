@@ -22,6 +22,30 @@ def search_donor_library(query: str = "") -> list[dict]:
     return [record for record in OFFLINE_DONOR_LIBRARY if not query or query in " ".join(str(value).lower() for value in record.values())]
 
 
+def import_package_metadata(package_root: Path) -> dict:
+    """Read safe JSON metadata from an existing package without executing it."""
+    root = Path(package_root)
+    if not root.is_dir():
+        raise ValueError("Package metadata source must be a directory.")
+    imported = {}
+    for name in ("mod.json", "validation.json"):
+        source = root / name
+        if not source.is_file():
+            continue
+        if source.stat().st_size > 2_000_000:
+            raise ValueError(f"Metadata file is too large: {name}.")
+        try:
+            value = json.loads(source.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise ValueError(f"Unable to read safe metadata file {name}: {exc}") from exc
+        if not isinstance(value, dict):
+            raise ValueError(f"Metadata file must contain an object: {name}.")
+        imported[name] = value
+    if not imported:
+        raise ValueError("No supported JSON metadata files were found.")
+    return {"source": str(root), "files": imported, "executed": False, "installed": False}
+
+
 class BlueprintLibrary:
     """Local, design-only library of reusable Content Creator projects."""
 
