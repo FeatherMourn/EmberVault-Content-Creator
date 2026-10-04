@@ -112,10 +112,25 @@ promotion of research into working game content.
 46. [ ] Add a capability matrix that separates offline-supported,
      external-tool-dependent, and runtime-unverified features.
 
+### Controlled new-item verification — future gated phase
+
+47. [ ] Automate new-model project setup, base GUID validation, item and recipe
+    metadata validation, package generation, hashes, and replacement checks.
+48. [ ] Create isolated test-package and profile preparation with verified
+    backups, rollback instructions, and test-state tracking.
+49. [ ] Run a controlled new-item test with the armchair as the first candidate,
+    keeping it separate from vanilla replacement workflows.
+50. [ ] Record direct runtime observations for independent registration, recipe
+    visibility, crafting or acquisition, icon and name display, model visuals,
+    placement, interaction, persistence, and rollback.
+51. [ ] Test multiplayer behavior as a separate evidence gate.
+52. [ ] Require user-confirmed or reproducible runtime evidence before marking
+    any new-item capability verified.
+
 ### Later promotion work
 
-47. [ ] Publish only sanitized, review-approved exports to EmberVault Web.
-48. [ ] Add runtime adapters only when current-build evidence proves behavior,
+53. [ ] Publish only sanitized, review-approved exports to EmberVault Web.
+54. [ ] Add runtime adapters only when current-build evidence proves behavior,
     persistence, multiplayer impact, and rollback.
 
 ## Definition of done
@@ -137,4 +152,6 @@ promotion of research into working game content.
       snapshots, comparison views, fixture library, searchable donor library,
       safe metadata import, and capability matrix are implemented.
 - [ ] Tests, documentation, and package verification pass.
+- [ ] New-item verification separates automated package evidence from
+      user-confirmed runtime observations and multiplayer evidence.
 - [ ] Changes are committed and pushed.
