@@ -63,10 +63,13 @@ class ContentCreatorWindow(QMainWindow):
         save_blueprint.clicked.connect(self.save_blueprint)
         import_metadata = QPushButton("Import safe package metadata")
         import_metadata.clicked.connect(self.import_metadata)
+        publish = QPushButton("Prepare sanitized Web Catalog record")
+        publish.clicked.connect(self.publish_catalog_record)
         blueprint_layout.addWidget(self.blueprint_search)
         blueprint_layout.addWidget(self.blueprint_results)
         blueprint_layout.addWidget(save_blueprint)
         blueprint_layout.addWidget(import_metadata)
+        blueprint_layout.addWidget(publish)
         layout.addWidget(blueprints)
 
         furniture = QGroupBox("Furniture workspace")
@@ -260,6 +263,16 @@ class ContentCreatorWindow(QMainWindow):
             self._update_inline_validation()
         except ValueError as exc:
             self.status.setText("Metadata import blocked: " + str(exc))
+
+    def publish_catalog_record(self) -> None:
+        try:
+            self.project = self._read_project()
+            destination = self.blueprints.publish_record(
+                self.project, Path.cwd() / "content-projects" / "public" / f"{self.project.project_id}.json"
+            )
+            self.status.setText(f"Sanitized Web Catalog record prepared: {destination.name}")
+        except ValueError as exc:
+            self.status.setText("Catalog preparation blocked: " + str(exc))
 
     def _update_project_summary(self) -> None:
         if not self.project.name:

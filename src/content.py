@@ -109,6 +109,37 @@ class BlueprintLibrary:
         self._log("blueprint_duplicated", project.project_id, {"source": str(source)})
         return project
 
+    def public_record(self, project: "FurnitureProject") -> dict:
+        """Build a sanitized Web Catalog record without private workspace data."""
+        issues = project.review_issues()
+        preview = project.preview()
+        return {
+            "record_type": "content-blueprint",
+            "record_version": 1,
+            "title": project.name,
+            "category": project.category,
+            "workflow_mode": project.workflow_mode,
+            "description": project.description,
+            "tags": [project.category, project.workflow_mode],
+            "preview_hash": preview["preview_hash"],
+            "evidence_state": "review-required" if issues else "reviewed",
+            "review_issues": issues,
+            "compatibility": {
+                "game_build": project.blender_handoff.get("game_build", "unknown"),
+                "blender_version": project.blender_handoff.get("blender_version", "unknown"),
+            },
+            "application_state": "design-only",
+            "live_game_files_touched": False,
+        }
+
+    def publish_record(self, project: "FurnitureProject", destination: Path) -> Path:
+        record = self.public_record(project)
+        destination = Path(destination)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+        self._log("catalog_record_prepared", project.project_id, {"destination": "sanitized-public-record"})
+        return destination
+
 
 def validate_export_contract(payload: dict) -> list[str]:
     issues = []
