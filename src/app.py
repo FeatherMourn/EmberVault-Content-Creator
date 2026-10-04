@@ -7,7 +7,7 @@ from pathlib import Path
 from PySide6.QtWidgets import (
     QApplication, QComboBox, QFormLayout, QGroupBox, QLabel, QLineEdit,
     QListWidget, QMainWindow, QMessageBox, QPushButton, QDoubleSpinBox, QFileDialog,
-    QVBoxLayout, QWidget,
+    QVBoxLayout, QHBoxLayout, QWidget,
 )
 
 from .content import FurnitureProject, bed_template
@@ -28,6 +28,17 @@ class ContentCreatorWindow(QMainWindow):
         title.setStyleSheet("font-size: 22px; font-weight: bold; color: #ef8b4d;")
         layout.addWidget(title)
         layout.addWidget(QLabel("Design furniture and other content in a project workspace. Export is design-only until explicitly tested."))
+
+        dashboard = QGroupBox("Project dashboard")
+        dashboard_layout = QVBoxLayout(dashboard)
+        self.project_summary = QLabel("No project loaded. Start from a fixture or begin a new design.")
+        self.workflow_step = QComboBox()
+        self.workflow_step.addItems(["1. Project setup", "2. Authoring", "3. Evidence review", "4. Tool handoff", "5. Export review"])
+        self.workflow_step.currentIndexChanged.connect(self._update_workflow_step)
+        dashboard_layout.addWidget(self.project_summary)
+        dashboard_layout.addWidget(QLabel("Guided workflow step"))
+        dashboard_layout.addWidget(self.workflow_step)
+        layout.addWidget(dashboard)
 
         furniture = QGroupBox("Furniture workspace")
         form = QFormLayout(furniture)
@@ -79,8 +90,15 @@ class ContentCreatorWindow(QMainWindow):
         layout.addWidget(self.capabilities)
         self.verification = QLabel("Verification: no project loaded.")
         layout.addWidget(self.verification)
+        self.inline_validation = QLabel("Validation: enter a project name to begin.")
+        layout.addWidget(self.inline_validation)
         self.workflow.currentTextChanged.connect(self._update_capabilities)
+        self.name.textChanged.connect(self._update_inline_validation)
+        self.category.currentTextChanged.connect(self._update_inline_validation)
+        self.donor_item.textChanged.connect(self._update_inline_validation)
+        self.donor_recipe.textChanged.connect(self._update_inline_validation)
         self._update_capabilities(self.workflow.currentText())
+        self._update_inline_validation()
         self.setCentralWidget(root)
 
     @staticmethod
@@ -100,6 +118,7 @@ class ContentCreatorWindow(QMainWindow):
         self.target_guid.clear(); self.base_template_guid.clear(); self.base_item_guid.clear()
         self.evidence_title.clear(); self.evidence_source.clear()
         self.verification.setText("Verification: " + ", ".join(f"{key}={value}" for key, value in self.project.verification.items()))
+        self._update_project_summary()
         self.status.setText("Loaded tested bed workflow as a new furniture project.")
 
     def _read_project(self) -> FurnitureProject:
@@ -141,8 +160,34 @@ class ContentCreatorWindow(QMainWindow):
             unknown = "independent registration, crafting UI, icon display, persistence, multiplayer"
         self.capabilities.setText(f"Supported offline: {supported}. Unverified: {unknown}.")
 
+    def _update_workflow_step(self, index: int) -> None:
+        self.status.setText(f"Guided workflow: {self.workflow_step.itemText(index)}")
+
+    def _update_project_summary(self) -> None:
+        if not self.project.name:
+            self.project_summary.setText("No project loaded. Start from a fixture or begin a new design.")
+            return
+        self.project_summary.setText(
+            f"{self.project.name} · {self.project.category} · {self.project.workflow_mode} · "
+            f"evidence: {len(self.project.evidence)} · project ID: {self.project.project_id}"
+        )
+
+    def _update_inline_validation(self) -> None:
+        try:
+            project = self._read_project()
+            issues = project.validate()
+        except ValueError as exc:
+            issues = [str(exc)]
+        if issues:
+            self.inline_validation.setText("Validation: " + " ".join(issues))
+            self.inline_validation.setStyleSheet("color: #d66;")
+        else:
+            self.inline_validation.setText("Validation: current project fields are valid.")
+            self.inline_validation.setStyleSheet("color: #6c6;")
+
     def preview(self) -> None:
         self.project = self._read_project(); issues = self.project.validate(); self.preview_list.clear()
+        self._update_project_summary()
         if issues:
             self.status.setText("Needs review: " + " ".join(issues)); return
         for key, value in self.project.manifest()["project"].items():
@@ -182,6 +227,7 @@ class ContentCreatorWindow(QMainWindow):
             self.base_item_guid.setText(self.project.base_item_guid or "")
             self.evidence_title.clear(); self.evidence_source.clear()
             self.verification.setText("Verification: " + ", ".join(f"{key}={value}" for key, value in self.project.verification.items()))
+            self._update_project_summary()
             self.status.setText(f"Project opened: {source}")
         except ValueError as exc:
             QMessageBox.warning(self, "Project could not be opened", str(exc))
