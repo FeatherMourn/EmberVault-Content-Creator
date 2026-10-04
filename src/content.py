@@ -34,15 +34,28 @@ class BlueprintLibrary:
         if issues:
             raise ValueError("Cannot add invalid blueprint: " + " ".join(issues))
         record = project.to_project_dict()
+        destination = self.root / f"{project.project_id}.json"
+        previous = {}
+        if destination.exists():
+            try:
+                previous = json.loads(destination.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                previous = {}
+        versions = list(previous.get("blueprint", {}).get("versions", []))
+        version = len(versions) + 1
+        if previous:
+            versions.append({"version": version - 1, "preview_hash": previous.get("blueprint", {}).get("preview_hash", "")})
         record["blueprint"] = {
             "title": project.name,
             "tags": sorted({tag.strip() for tag in (tags or []) if tag.strip()}),
             "workflow_mode": project.workflow_mode,
             "evidence_state": "review-required" if project.review_issues() else "reviewed",
             "preview_hash": project.preview()["preview_hash"],
+            "version": version,
+            "versions": versions,
         }
-        destination = self.root / f"{project.project_id}.json"
         destination.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+        self._log("blueprint_saved", project.project_id, {"version": version, "tags": record["blueprint"]["tags"]})
         return destination
 
     def search(self, query: str = "") -> list[dict]:
@@ -59,11 +72,17 @@ class BlueprintLibrary:
                 results.append({"path": source, "record": record})
         return results
 
+    def _log(self, event: str, project_id: str, details: dict | None = None) -> None:
+        entry = {"event": event, "project_id": project_id, "details": details or {}}
+        with (self.root / "activity.jsonl").open("a", encoding="utf-8") as stream:
+            stream.write(json.dumps(entry, sort_keys=True) + "\n")
+
     def duplicate(self, source: Path) -> "FurnitureProject":
         project = FurnitureProject.load(Path(source))
         project.project_id = f"cc-{uuid4().hex}"
         project.name = f"Copy of {project.name}"
         project.history = []
+        self._log("blueprint_duplicated", project.project_id, {"source": str(source)})
         return project
 
 
