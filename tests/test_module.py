@@ -25,7 +25,11 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertEqual(project.source_template, "tested-bed-workflow")
         self.assertEqual(project.donor_item_id, 2940001508)
         self.assertEqual(project.donor_recipe_id, 3531872774)
+        self.assertEqual(project.verification["registration"], "verified")
+        self.assertEqual(project.verification["visuals"], "unverified")
+        self.assertEqual(len(project.evidence), 1)
         self.assertFalse(project.manifest()["live_game_files_touched"])
+        self.assertEqual(project.manifest()["schema_id"], "https://embervault.dev/contracts/content-project-export.schema.json")
 
     def test_furniture_manifest_exports(self):
         with TemporaryDirectory() as folder:
