@@ -8,6 +8,7 @@ from uuid import uuid4
 
 
 PROJECT_SCHEMA_VERSION = 1
+SUPPORTED_FURNITURE_CATEGORIES = {"bed", "chair", "table", "storage", "decor"}
 
 
 @dataclass
@@ -79,6 +80,8 @@ class FurnitureProject:
             issues.append("A furniture name is required.")
         if any(value <= 0 for value in (self.width, self.height, self.depth)):
             issues.append("Furniture dimensions must be greater than zero.")
+        if self.category not in SUPPORTED_FURNITURE_CATEGORIES:
+            issues.append(f"Unsupported furniture category: {self.category}.")
         if any(Path(ref).is_absolute() or ".." in Path(ref).parts for ref in self.asset_references):
             issues.append("Asset references must remain inside the project.")
         allowed = {"verified", "partial", "unverified", "blocked", "not_applicable"}
@@ -89,6 +92,19 @@ class FurnitureProject:
                 issues.append("Each evidence record needs a title.")
                 break
         return issues
+
+    def set_dimensions(self, width: float, height: float, depth: float) -> None:
+        self.width, self.height, self.depth = width, height, depth
+        issues = self.validate()
+        if any("dimensions" in issue for issue in issues):
+            raise ValueError("Furniture dimensions must be greater than zero.")
+
+    def add_asset_reference(self, reference: str) -> None:
+        reference = str(reference).strip()
+        if not reference or Path(reference).is_absolute() or ".." in Path(reference).parts:
+            raise ValueError("Asset references must remain inside the project.")
+        if reference not in self.asset_references:
+            self.asset_references.append(reference)
 
     def manifest(self) -> dict:
         return {
@@ -153,3 +169,13 @@ def bed_template() -> FurnitureProject:
             "multiplayer": "unverified",
         },
     )
+
+
+def create_furniture_project(name: str, category: str = "bed") -> FurnitureProject:
+    """Create a guided furniture project without accessing game resources."""
+    name = name.strip()
+    if not name:
+        raise ValueError("A furniture name is required.")
+    if category not in SUPPORTED_FURNITURE_CATEGORIES:
+        raise ValueError(f"Unsupported furniture category: {category}.")
+    return FurnitureProject(name=name, category=category)

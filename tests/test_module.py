@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 
 from embervault_sdk import ModuleContext
 from src.module import validate_design
-from src.content import bed_template
+from src.content import bed_template, create_furniture_project
 
 
 class ContentCreatorTests(unittest.TestCase):
@@ -53,6 +53,18 @@ class ContentCreatorTests(unittest.TestCase):
             source.write_text(json.dumps({"project_schema_version": 99}), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "Unsupported"):
                 bed_template().load(source)
+
+    def test_guided_furniture_authoring_supports_bed_dimensions_and_assets(self):
+        project = create_furniture_project("Guest Bed")
+        project.set_dimensions(2.0, 1.2, 3.0)
+        project.add_asset_reference("assets/guest-bed.glb")
+        self.assertEqual(project.category, "bed")
+        self.assertEqual(project.width, 2.0)
+        self.assertEqual(project.asset_references, ["assets/guest-bed.glb"])
+
+    def test_guided_authoring_rejects_unsupported_categories(self):
+        with self.assertRaisesRegex(ValueError, "Unsupported"):
+            create_furniture_project("Unknown", "vehicle")
 
 
 if __name__ == "__main__":
