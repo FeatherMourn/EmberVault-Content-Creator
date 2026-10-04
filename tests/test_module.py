@@ -7,8 +7,9 @@ from embervault_sdk import ModuleContext
 from src.module import validate_design
 from src.content import (BlueprintLibrary, bed_template, create_furniture_project,
                          compare_package_metadata, import_package_metadata,
-                         prepare_bed_vertical_slice, reproducibility_report,
-                         validate_export_contract, validate_guid_collisions)
+                         import_generated_package, prepare_bed_vertical_slice,
+                         reproducibility_report, validate_export_contract,
+                         validate_guid_collisions)
 
 
 class ContentCreatorTests(unittest.TestCase):
@@ -216,6 +217,19 @@ class ContentCreatorTests(unittest.TestCase):
             self.assertIn("mod.json", report["files"])
             self.assertTrue(report["files"]["mod.json"]["sha256"])
             self.assertFalse(report["live_game_files_touched"])
+
+    def test_generated_package_metadata_can_be_reimported_without_execution(self):
+        with TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root / "validation.json").write_text(json.dumps({
+                "target_guid": "target", "new_model": True, "vertex_count": 10,
+                "index_count": 10, "base_item_guid": "item",
+                "base_template_guid": "template", "item_name": "Chair",
+            }), encoding="utf-8")
+            (root / "crafting.json").write_text('{"recipe_guid":"recipe"}', encoding="utf-8")
+            imported = import_generated_package(root)
+            self.assertIn("crafting.json", imported["files"])
+            self.assertFalse(imported["executed"])
 
     def test_public_record_excludes_private_evidence_sources(self):
         with TemporaryDirectory() as folder:

@@ -78,6 +78,41 @@ def reproducibility_report(package_root: Path, metadata: dict, tool_versions: di
     return {"metadata": metadata, "tool_versions": dict(tool_versions), "files": files, "live_game_files_touched": False}
 
 
+def validate_generated_metadata(metadata: dict) -> list[str]:
+    required = {"target_guid", "new_model", "vertex_count", "index_count"}
+    issues = [f"missing:{key}" for key in sorted(required - metadata.keys())]
+    if not isinstance(metadata.get("new_model"), bool):
+        issues.append("new_model must be boolean")
+    if not isinstance(metadata.get("vertex_count"), int) or metadata.get("vertex_count", 0) <= 0:
+        issues.append("vertex_count must be positive")
+    if not isinstance(metadata.get("index_count"), int) or metadata.get("index_count", 0) < 0:
+        issues.append("index_count must be non-negative")
+    if metadata.get("new_model") and not all(metadata.get(key) for key in ("base_item_guid", "base_template_guid", "item_name")):
+        issues.append("new-model metadata is missing base or item fields")
+    return issues
+
+
+def import_generated_package(package_root: Path) -> dict:
+    """Import generated JSON evidence without executing package code."""
+    root = Path(package_root)
+    if not root.is_dir():
+        raise ValueError("Generated package root must be a directory.")
+    imported = {}
+    for name in ("mod.json", "validation.json", "crafting.json"):
+        source = root / name
+        if source.exists():
+            value = json.loads(source.read_text(encoding="utf-8"))
+            if not isinstance(value, dict):
+                raise ValueError(f"Generated metadata must be an object: {name}.")
+            imported[name] = value
+    if "validation.json" not in imported:
+        raise ValueError("Generated package is missing validation.json.")
+    issues = validate_generated_metadata(imported["validation.json"])
+    if issues:
+        raise ValueError("Generated metadata invalid: " + " ".join(issues))
+    return {"files": imported, "executed": False, "installed": False}
+
+
 class BlueprintLibrary:
     """Local, design-only library of reusable Content Creator projects."""
 
