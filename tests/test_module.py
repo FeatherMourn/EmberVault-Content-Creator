@@ -1,3 +1,4 @@
+import json
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -35,6 +36,23 @@ class ContentCreatorTests(unittest.TestCase):
         with TemporaryDirectory() as folder:
             destination = bed_template().export(Path(folder) / "bed.json")
             self.assertTrue(destination.is_file())
+
+    def test_project_save_and_load_preserves_identity_and_design_data(self):
+        with TemporaryDirectory() as folder:
+            source = Path(folder) / "project.json"
+            project = bed_template()
+            project.save(source)
+            loaded = project.load(source)
+            self.assertEqual(loaded.project_id, project.project_id)
+            self.assertEqual(loaded.donor_recipe_id, project.donor_recipe_id)
+            self.assertEqual(loaded.verification, project.verification)
+
+    def test_project_load_rejects_unknown_version(self):
+        with TemporaryDirectory() as folder:
+            source = Path(folder) / "project.json"
+            source.write_text(json.dumps({"project_schema_version": 99}), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "Unsupported"):
+                bed_template().load(source)
 
 
 if __name__ == "__main__":

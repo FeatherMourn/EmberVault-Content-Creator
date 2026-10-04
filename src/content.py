@@ -4,10 +4,15 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 import json
 from pathlib import Path
+from uuid import uuid4
+
+
+PROJECT_SCHEMA_VERSION = 1
 
 
 @dataclass
 class FurnitureProject:
+    project_id: str = field(default_factory=lambda: f"cc-{uuid4().hex}")
     name: str = ""
     description: str = ""
     category: str = "bed"
@@ -30,6 +35,43 @@ class FurnitureProject:
         "persistence": "unverified",
         "multiplayer": "unverified",
     })
+
+    def to_project_dict(self) -> dict:
+        return {
+            "project_schema_version": PROJECT_SCHEMA_VERSION,
+            "project_id": self.project_id,
+            "content_type": "furniture",
+            "project": asdict(self),
+        }
+
+    def save(self, destination: Path) -> Path:
+        """Persist an editable project without touching game files."""
+        destination = Path(destination)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        temporary = destination.with_name(f".{destination.name}.tmp")
+        temporary.write_text(json.dumps(self.to_project_dict(), indent=2) + "\n", encoding="utf-8")
+        temporary.replace(destination)
+        return destination
+
+    @classmethod
+    def load(cls, source: Path) -> "FurnitureProject":
+        source = Path(source)
+        try:
+            payload = json.loads(source.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise ValueError(f"Unable to load project: {exc}") from exc
+        if payload.get("project_schema_version") != PROJECT_SCHEMA_VERSION:
+            raise ValueError("Unsupported Content Creator project version.")
+        project = payload.get("project")
+        if not isinstance(project, dict) or project.get("project_id") != payload.get("project_id"):
+            raise ValueError("Project identity is missing or inconsistent.")
+        allowed = {field.name for field in cls.__dataclass_fields__.values()}
+        values = {key: value for key, value in project.items() if key in allowed}
+        loaded = cls(**values)
+        issues = loaded.validate()
+        if issues:
+            raise ValueError("Invalid project: " + " ".join(issues))
+        return loaded
 
     def validate(self) -> list[str]:
         issues = []
