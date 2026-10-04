@@ -1,0 +1,61 @@
+"""Standalone Content Creator project and furniture foundation."""
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass, field
+import json
+from pathlib import Path
+
+
+@dataclass
+class FurnitureProject:
+    name: str = ""
+    description: str = ""
+    category: str = "bed"
+    width: float = 2.0
+    height: float = 1.0
+    depth: float = 3.0
+    materials: list[str] = field(default_factory=list)
+    asset_references: list[str] = field(default_factory=list)
+    source_template: str = ""
+
+    def validate(self) -> list[str]:
+        issues = []
+        if not self.name.strip():
+            issues.append("A furniture name is required.")
+        if any(value <= 0 for value in (self.width, self.height, self.depth)):
+            issues.append("Furniture dimensions must be greater than zero.")
+        if any(Path(ref).is_absolute() or ".." in Path(ref).parts for ref in self.asset_references):
+            issues.append("Asset references must remain inside the project.")
+        return issues
+
+    def manifest(self) -> dict:
+        return {
+            "schema_version": 1,
+            "application": "EmberVault Content Creator",
+            "application_state": "design-only",
+            "content_type": "furniture",
+            "project": asdict(self),
+            "live_game_files_touched": False,
+        }
+
+    def export(self, destination: Path) -> Path:
+        issues = self.validate()
+        if issues:
+            raise ValueError(" ".join(issues))
+        destination = Path(destination)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(json.dumps(self.manifest(), indent=2), encoding="utf-8")
+        return destination
+
+
+def bed_template() -> FurnitureProject:
+    return FurnitureProject(
+        name="New Bed Design",
+        description="Furniture based on the proven in-game bed workflow.",
+        category="bed",
+        width=2.0,
+        height=1.0,
+        depth=3.0,
+        materials=["wood", "fabric"],
+        source_template="tested-bed-workflow",
+    )
