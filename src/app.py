@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QWidget,
 )
 
-from .content import FurnitureProject, bed_template
+from .content import FurnitureProject, bed_template, search_donor_library
 
 
 class ContentCreatorWindow(QMainWindow):
@@ -39,6 +39,17 @@ class ContentCreatorWindow(QMainWindow):
         dashboard_layout.addWidget(QLabel("Guided workflow step"))
         dashboard_layout.addWidget(self.workflow_step)
         layout.addWidget(dashboard)
+
+        library = QGroupBox("Offline donor and recipe library")
+        library_layout = QVBoxLayout(library)
+        self.donor_search = QLineEdit()
+        self.donor_search.setPlaceholderText("Search donors, recipes, categories, or sources")
+        self.donor_search.textChanged.connect(self._search_donors)
+        self.donor_results = QListWidget()
+        self.donor_results.itemClicked.connect(self._select_donor)
+        library_layout.addWidget(self.donor_search)
+        library_layout.addWidget(self.donor_results)
+        layout.addWidget(library)
 
         furniture = QGroupBox("Furniture workspace")
         form = QFormLayout(furniture)
@@ -104,6 +115,7 @@ class ContentCreatorWindow(QMainWindow):
         self.donor_recipe.textChanged.connect(self._update_inline_validation)
         self._update_capabilities(self.workflow.currentText())
         self._update_inline_validation()
+        self._search_donors("")
         self.setCentralWidget(root)
 
     @staticmethod
@@ -167,6 +179,25 @@ class ContentCreatorWindow(QMainWindow):
 
     def _update_workflow_step(self, index: int) -> None:
         self.status.setText(f"Guided workflow: {self.workflow_step.itemText(index)}")
+
+    def _search_donors(self, query: str) -> None:
+        self.donor_results.clear()
+        for record in search_donor_library(query):
+            item_id = record["item_id"] if record["item_id"] is not None else "not registered"
+            recipe_id = record["recipe_id"] if record["recipe_id"] is not None else "not registered"
+            self.donor_results.addItem(f"{record['name']} · {record['category']} · item {item_id} · recipe {recipe_id} · offline evidence")
+
+    def _select_donor(self, item) -> None:
+        selected = item.text()
+        for record in search_donor_library(""):
+            if record["name"] not in selected:
+                continue
+            if record["item_id"] is not None:
+                self.donor_item.setText(str(record["item_id"]))
+            if record["recipe_id"] is not None:
+                self.donor_recipe.setText(str(record["recipe_id"]))
+            self.status.setText(f"Selected offline donor: {record['name']}. Runtime behavior remains unverified.")
+            return
 
     def _update_project_summary(self) -> None:
         if not self.project.name:

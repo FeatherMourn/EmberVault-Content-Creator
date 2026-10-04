@@ -11,6 +11,16 @@ from uuid import uuid4
 PROJECT_SCHEMA_VERSION = 1
 SUPPORTED_FURNITURE_CATEGORIES = {"bed", "chair", "table", "storage", "decor"}
 
+OFFLINE_DONOR_LIBRARY = [
+    {"name": "Vanilla bed donor", "category": "bed", "item_id": 2940001508, "recipe_id": 3531872774, "source": "tested bed workflow"},
+    {"name": "Rough wood chair donor", "category": "chair", "item_id": None, "recipe_id": None, "source": "medieval armchair offline fixture"},
+]
+
+
+def search_donor_library(query: str = "") -> list[dict]:
+    query = query.strip().lower()
+    return [record for record in OFFLINE_DONOR_LIBRARY if not query or query in " ".join(str(value).lower() for value in record.values())]
+
 
 def validate_export_contract(payload: dict) -> list[str]:
     issues = []
