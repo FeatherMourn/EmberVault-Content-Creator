@@ -22,6 +22,51 @@ def search_donor_library(query: str = "") -> list[dict]:
     return [record for record in OFFLINE_DONOR_LIBRARY if not query or query in " ".join(str(value).lower() for value in record.values())]
 
 
+class BlueprintLibrary:
+    """Local, design-only library of reusable Content Creator projects."""
+
+    def __init__(self, root: Path) -> None:
+        self.root = Path(root)
+        self.root.mkdir(parents=True, exist_ok=True)
+
+    def save(self, project: "FurnitureProject", tags: list[str] | None = None) -> Path:
+        issues = project.validate()
+        if issues:
+            raise ValueError("Cannot add invalid blueprint: " + " ".join(issues))
+        record = project.to_project_dict()
+        record["blueprint"] = {
+            "title": project.name,
+            "tags": sorted({tag.strip() for tag in (tags or []) if tag.strip()}),
+            "workflow_mode": project.workflow_mode,
+            "evidence_state": "review-required" if project.review_issues() else "reviewed",
+            "preview_hash": project.preview()["preview_hash"],
+        }
+        destination = self.root / f"{project.project_id}.json"
+        destination.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+        return destination
+
+    def search(self, query: str = "") -> list[dict]:
+        query = query.strip().lower()
+        results = []
+        for source in sorted(self.root.glob("*.json")):
+            try:
+                record = json.loads(source.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            blueprint = record.get("blueprint", {})
+            haystack = " ".join(str(value).lower() for value in [blueprint, record.get("project", {})])
+            if not query or query in haystack:
+                results.append({"path": source, "record": record})
+        return results
+
+    def duplicate(self, source: Path) -> "FurnitureProject":
+        project = FurnitureProject.load(Path(source))
+        project.project_id = f"cc-{uuid4().hex}"
+        project.name = f"Copy of {project.name}"
+        project.history = []
+        return project
+
+
 def validate_export_contract(payload: dict) -> list[str]:
     issues = []
     required = {"schema_version", "schema_id", "application_state", "content_type", "project", "runtime_plan", "evidence_summary", "evidence", "live_game_files_touched"}

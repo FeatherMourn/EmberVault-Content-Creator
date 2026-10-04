@@ -10,13 +10,14 @@ from PySide6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QWidget,
 )
 
-from .content import FurnitureProject, bed_template, search_donor_library
+from .content import BlueprintLibrary, FurnitureProject, bed_template, search_donor_library
 
 
 class ContentCreatorWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.project = FurnitureProject()
+        self.blueprints = BlueprintLibrary(Path.cwd() / "content-projects" / "blueprints")
         self.setWindowTitle("EmberVault Content Creator")
         self.resize(920, 680)
         self._build_ui()
@@ -50,6 +51,20 @@ class ContentCreatorWindow(QMainWindow):
         library_layout.addWidget(self.donor_search)
         library_layout.addWidget(self.donor_results)
         layout.addWidget(library)
+
+        blueprints = QGroupBox("Blueprint library")
+        blueprint_layout = QVBoxLayout(blueprints)
+        self.blueprint_search = QLineEdit()
+        self.blueprint_search.setPlaceholderText("Search saved blueprints")
+        self.blueprint_search.textChanged.connect(self._search_blueprints)
+        self.blueprint_results = QListWidget()
+        self.blueprint_results.itemClicked.connect(self._select_blueprint)
+        save_blueprint = QPushButton("Save current project as blueprint")
+        save_blueprint.clicked.connect(self.save_blueprint)
+        blueprint_layout.addWidget(self.blueprint_search)
+        blueprint_layout.addWidget(self.blueprint_results)
+        blueprint_layout.addWidget(save_blueprint)
+        layout.addWidget(blueprints)
 
         furniture = QGroupBox("Furniture workspace")
         form = QFormLayout(furniture)
@@ -120,6 +135,7 @@ class ContentCreatorWindow(QMainWindow):
         self._update_capabilities(self.workflow.currentText())
         self._update_inline_validation()
         self._search_donors("")
+        self._search_blueprints("")
         self.setCentralWidget(root)
 
     @staticmethod
@@ -202,6 +218,33 @@ class ContentCreatorWindow(QMainWindow):
                 self.donor_recipe.setText(str(record["recipe_id"]))
             self.status.setText(f"Selected offline donor: {record['name']}. Runtime behavior remains unverified.")
             return
+
+    def _search_blueprints(self, query: str) -> None:
+        self.blueprint_results.clear()
+        for result in self.blueprints.search(query):
+            blueprint = result["record"].get("blueprint", {})
+            self.blueprint_results.addItem(
+                f"{blueprint.get('title', 'Untitled')} · {blueprint.get('workflow_mode', 'unknown')} · "
+                f"{blueprint.get('evidence_state', 'unknown')}"
+            )
+
+    def _select_blueprint(self, item) -> None:
+        title = item.text().split(" · ", 1)[0]
+        for result in self.blueprints.search(title):
+            if result["record"].get("blueprint", {}).get("title") == title:
+                self.project = self.blueprints.duplicate(result["path"])
+                self._populate_fields()
+                self.status.setText(f"Created a new project from blueprint: {title}")
+                return
+
+    def save_blueprint(self) -> None:
+        try:
+            self.project = self._read_project()
+            destination = self.blueprints.save(self.project, [self.project.category, self.project.workflow_mode])
+            self._search_blueprints(self.blueprint_search.text())
+            self.status.setText(f"Blueprint saved: {destination.name}")
+        except ValueError as exc:
+            self.status.setText("Blueprint blocked: " + str(exc))
 
     def _update_project_summary(self) -> None:
         if not self.project.name:
