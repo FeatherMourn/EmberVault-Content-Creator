@@ -6,7 +6,7 @@ from pathlib import Path
 
 from PySide6.QtWidgets import (
     QApplication, QComboBox, QFormLayout, QGroupBox, QLabel, QLineEdit,
-    QListWidget, QMainWindow, QMessageBox, QPushButton, QDoubleSpinBox,
+    QListWidget, QMainWindow, QMessageBox, QPushButton, QDoubleSpinBox, QFileDialog,
     QVBoxLayout, QWidget,
 )
 
@@ -53,7 +53,10 @@ class ContentCreatorWindow(QMainWindow):
         preview.clicked.connect(self.preview)
         export = QPushButton("Export design manifest")
         export.clicked.connect(self.export_manifest)
-        actions.addWidget(template); actions.addWidget(preview); actions.addWidget(export)
+        save = QPushButton("Save project"); save.clicked.connect(self.save_project)
+        open_project = QPushButton("Open project"); open_project.clicked.connect(self.open_project)
+        actions.addWidget(template); actions.addWidget(preview); actions.addWidget(save)
+        actions.addWidget(open_project); actions.addWidget(export)
         layout.addLayout(actions)
         self.status = QLabel("No furniture project loaded.")
         layout.addWidget(self.status)
@@ -75,13 +78,20 @@ class ContentCreatorWindow(QMainWindow):
         self.status.setText("Loaded tested bed workflow as a new furniture project.")
 
     def _read_project(self) -> FurnitureProject:
-        return FurnitureProject(
+        project = FurnitureProject(
+            project_id=self.project.project_id,
             name=self.name.text(), description=self.description.text(), category=self.category.currentText(),
             width=self.width.value(), height=self.height.value(), depth=self.depth.value(),
             materials=[item.strip() for item in self.materials.text().split(",") if item.strip()],
             asset_references=[item.strip() for item in self.assets.text().split(",") if item.strip()],
             source_template=self.project.source_template,
         )
+        project.donor_item_id = self.project.donor_item_id
+        project.donor_recipe_id = self.project.donor_recipe_id
+        project.evidence = list(self.project.evidence)
+        project.verification = dict(self.project.verification)
+        project.blender_handoff = dict(self.project.blender_handoff)
+        return project
 
     def preview(self) -> None:
         self.project = self._read_project(); issues = self.project.validate(); self.preview_list.clear()
@@ -89,7 +99,35 @@ class ContentCreatorWindow(QMainWindow):
             self.status.setText("Needs review: " + " ".join(issues)); return
         for key, value in self.project.manifest()["project"].items():
             self.preview_list.addItem(f"{key}: {value}")
-        self.status.setText("Furniture design preview ready. Live game files are untouched.")
+        review = self.project.export_review()
+        self.status.setText(("Review required: " + " ".join(review["issues"])) if not review["ready"]
+                            else "Furniture design preview ready for export. Live game files are untouched.")
+
+    def save_project(self) -> None:
+        self.project = self._read_project()
+        destination, _ = QFileDialog.getSaveFileName(self, "Save Content Creator Project", "", "Content Creator Project (*.json)")
+        if not destination:
+            return
+        try:
+            self.project.save(Path(destination))
+            self.status.setText(f"Project saved: {destination}")
+        except ValueError as exc:
+            QMessageBox.warning(self, "Project could not be saved", str(exc))
+
+    def open_project(self) -> None:
+        source, _ = QFileDialog.getOpenFileName(self, "Open Content Creator Project", "", "Content Creator Project (*.json)")
+        if not source:
+            return
+        try:
+            self.project = FurnitureProject.load(Path(source))
+            self.name.setText(self.project.name); self.description.setText(self.project.description)
+            self.category.setCurrentText(self.project.category); self.width.setValue(self.project.width)
+            self.height.setValue(self.project.height); self.depth.setValue(self.project.depth)
+            self.materials.setText(", ".join(self.project.materials))
+            self.assets.setText(", ".join(self.project.asset_references))
+            self.status.setText(f"Project opened: {source}")
+        except ValueError as exc:
+            QMessageBox.warning(self, "Project could not be opened", str(exc))
 
     def export_manifest(self) -> None:
         self.project = self._read_project()
