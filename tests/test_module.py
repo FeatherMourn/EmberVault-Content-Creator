@@ -29,7 +29,7 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertEqual(project.workflow_mode, "new-model")
         self.assertEqual(project.category, "table")
         self.assertEqual(project.base_template_guid, "fixture-table-template")
-        self.assertEqual(project.verification["in_game_installation"], "unverified")
+        self.assertEqual(fixture["evidence_state"]["in_game_installation"], "unverified")
 
     def test_armchair_fixture_populates_new_model_workflow(self):
         fixture = json.loads((Path(__file__).parent / "fixtures" / "medieval_armchair.reference.json").read_text(encoding="utf-8"))
