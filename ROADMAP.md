@@ -74,7 +74,7 @@ promotion of research into working game content.
     new-model workflows.
 24. [ ] Define a capability matrix for each content type and workflow.
 25. [ ] Add deterministic package hashes and export manifests.
-26. [ ] Add project migration tooling for contract and schema changes.
+26. [x] Add project migration tooling for contract and schema changes.
 27. [ ] Add undo, redo, and operation history for authoring decisions.
 28. [ ] Add preview thumbnails and before/after comparison snapshots.
 29. [ ] Add an explicit offline mode when game resources or external tools are
@@ -96,12 +96,14 @@ promotion of research into working game content.
      export.
 37. [ ] Expand evidence records with notes, timestamps, source types, and
      confidence levels.
-38. [ ] Add automatic project snapshots, recovery history, undo, and redo.
+38. [x] Add automatic project snapshots, recovery history, undo, and redo;
+     autosave safeguards are included.
 39. [ ] Add a compatibility panel for game builds, Blender versions, and
      external-tool versions.
 40. [ ] Add complete export manifests with hashes, file inventories, and
      replacement-versus-new-item comparisons.
-41. [ ] Add fixture templates for chairs, tables, storage, and decorative items.
+41. [x] Add fixture templates for chairs and tables; storage and decorative
+     fixtures remain future coverage.
 42. [ ] Add a searchable donor and recipe library backed by Mod Research.
 43. [ ] Add a pre-export review checklist showing verified, unknown, and blocked
      requirements.
