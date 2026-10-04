@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 
 from embervault_sdk import ModuleContext
 from src.module import validate_design
-from src.content import (BlueprintLibrary, bed_template, create_furniture_project,
+from src.content import (BlueprintLibrary, FurnitureProject, bed_template, create_furniture_project,
                          compare_package_metadata, import_package_metadata,
                          audit_package_security, import_generated_package,
                          prepare_bed_vertical_slice,
@@ -99,6 +99,17 @@ class ContentCreatorTests(unittest.TestCase):
             source.write_text(json.dumps({"project_schema_version": 99}), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "Unsupported"):
                 bed_template().load(source)
+
+    def test_autosave_and_initial_project_migration_are_recoverable(self):
+        with TemporaryDirectory() as folder:
+            root = Path(folder)
+            project = create_furniture_project("Chair", "chair")
+            autosave = project.save_autosave(root / "chair.json")
+            self.assertTrue(autosave.is_file())
+            legacy = root / "legacy.json"
+            legacy.write_text(json.dumps({"project_id": project.project_id, "project": project.to_project_dict()["project"]}), encoding="utf-8")
+            migrated = FurnitureProject.load_with_migration(legacy)
+            self.assertEqual(migrated.project_id, project.project_id)
 
     def test_guided_furniture_authoring_supports_bed_dimensions_and_assets(self):
         project = create_furniture_project("Guest Bed")

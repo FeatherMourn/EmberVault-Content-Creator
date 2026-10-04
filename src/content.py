@@ -423,6 +423,11 @@ class FurnitureProject:
         temporary.replace(destination)
         return destination
 
+    def save_autosave(self, destination: Path) -> Path:
+        """Write a recoverable autosave beside the requested project path."""
+        destination = Path(destination)
+        return self.save(destination.with_name(destination.name + ".autosave"))
+
     def snapshot(self, label: str = "checkpoint") -> dict:
         """Record a portable recovery snapshot without touching game files."""
         snapshot = {
@@ -479,6 +484,21 @@ class FurnitureProject:
         if issues:
             raise ValueError("Invalid project: " + " ".join(issues))
         return loaded
+
+    @classmethod
+    def load_with_migration(cls, source: Path) -> "FurnitureProject":
+        """Migrate the initial unversioned project envelope, then validate it."""
+        source = Path(source)
+        payload = json.loads(source.read_text(encoding="utf-8"))
+        if payload.get("project_schema_version") is None and isinstance(payload.get("project"), dict):
+            payload["project_schema_version"] = PROJECT_SCHEMA_VERSION
+            payload["project"].setdefault("history", [])
+            payload["project"].setdefault("verification", {})
+            payload["project"]["verification"].setdefault("registration", "unverified")
+            migrated = source.with_name("." + source.name + ".migrated")
+            migrated.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+            migrated.replace(source)
+        return cls.load(source)
 
     def validate(self) -> list[str]:
         issues = []
