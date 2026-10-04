@@ -248,7 +248,7 @@ class FurnitureProject:
             "content_type": "furniture",
             "project": asdict(self),
             "runtime_plan": {
-                "strategy": "donor-preserving-clone",
+                "strategy": "vanilla-replacement" if self.workflow_mode == "replacement" else "donor-preserving-clone",
                 "donor_item_id": self.donor_item_id,
                 "donor_recipe_id": self.donor_recipe_id,
                 "clone_item_id": self.clone_item_id,
@@ -279,7 +279,7 @@ class FurnitureProject:
 
 
 def bed_template() -> FurnitureProject:
-    return FurnitureProject(
+    project = FurnitureProject(
         name="New Bed Design",
         description="Furniture based on the proven in-game bed workflow.",
         category="bed",
@@ -305,6 +305,8 @@ def bed_template() -> FurnitureProject:
             "multiplayer": "unverified",
         },
     )
+    project.workflow_mode = "replacement"
+    return project
 
 
 def prepare_bed_vertical_slice(destination: Path, package_files: list[str] | None = None) -> dict:
