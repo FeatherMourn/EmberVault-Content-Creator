@@ -34,6 +34,7 @@ class ContentCreatorWindow(QMainWindow):
         self.name = QLineEdit()
         self.description = QLineEdit()
         self.category = QComboBox(); self.category.addItems(["bed", "chair", "table", "storage", "other"])
+        self.workflow = QComboBox(); self.workflow.addItems(["replacement", "new-model"])
         self.width = self._dimension(2.0)
         self.height = self._dimension(1.0)
         self.depth = self._dimension(3.0)
@@ -42,6 +43,7 @@ class ContentCreatorWindow(QMainWindow):
         form.addRow("Name", self.name)
         form.addRow("Description", self.description)
         form.addRow("Furniture type", self.category)
+        form.addRow("Workflow", self.workflow)
         form.addRow("Width", self.width); form.addRow("Height", self.height); form.addRow("Depth", self.depth)
         form.addRow("Materials", self.materials); form.addRow("Asset references", self.assets)
         layout.addWidget(furniture)
@@ -62,6 +64,10 @@ class ContentCreatorWindow(QMainWindow):
         layout.addWidget(self.status)
         self.preview_list = QListWidget()
         layout.addWidget(self.preview_list)
+        self.capabilities = QLabel("Capabilities: choose a workflow to inspect support.")
+        layout.addWidget(self.capabilities)
+        self.workflow.currentTextChanged.connect(self._update_capabilities)
+        self._update_capabilities(self.workflow.currentText())
         self.setCentralWidget(root)
 
     @staticmethod
@@ -75,6 +81,7 @@ class ContentCreatorWindow(QMainWindow):
         self.category.setCurrentText(self.project.category); self.width.setValue(self.project.width)
         self.height.setValue(self.project.height); self.depth.setValue(self.project.depth)
         self.materials.setText(", ".join(self.project.materials))
+        self.workflow.setCurrentText(self.project.workflow_mode)
         self.status.setText("Loaded tested bed workflow as a new furniture project.")
 
     def _read_project(self) -> FurnitureProject:
@@ -86,12 +93,22 @@ class ContentCreatorWindow(QMainWindow):
             asset_references=[item.strip() for item in self.assets.text().split(",") if item.strip()],
             source_template=self.project.source_template,
         )
+        project.workflow_mode = self.workflow.currentText()
         project.donor_item_id = self.project.donor_item_id
         project.donor_recipe_id = self.project.donor_recipe_id
         project.evidence = list(self.project.evidence)
         project.verification = dict(self.project.verification)
         project.blender_handoff = dict(self.project.blender_handoff)
         return project
+
+    def _update_capabilities(self, workflow: str) -> None:
+        if workflow == "replacement":
+            supported = "mesh replacement, donor item, donor recipe"
+            unknown = "visuals, placement, persistence, multiplayer"
+        else:
+            supported = "new model metadata, base template, base item, recipe plan"
+            unknown = "independent registration, crafting UI, icon display, persistence, multiplayer"
+        self.capabilities.setText(f"Supported offline: {supported}. Unverified: {unknown}.")
 
     def preview(self) -> None:
         self.project = self._read_project(); issues = self.project.validate(); self.preview_list.clear()
@@ -125,6 +142,7 @@ class ContentCreatorWindow(QMainWindow):
             self.height.setValue(self.project.height); self.depth.setValue(self.project.depth)
             self.materials.setText(", ".join(self.project.materials))
             self.assets.setText(", ".join(self.project.asset_references))
+            self.workflow.setCurrentText(self.project.workflow_mode if self.project.workflow_mode in {"replacement", "new-model"} else "replacement")
             self.status.setText(f"Project opened: {source}")
         except ValueError as exc:
             QMessageBox.warning(self, "Project could not be opened", str(exc))
