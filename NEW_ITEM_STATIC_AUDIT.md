@@ -51,9 +51,16 @@ runtime behavior is claimed.
 - An explicit carpenter chair recipe template is recorded.
 - An explicit wood-log ingredient and count are recorded in `crafting.json`.
 - The refined package contains five files, including the crafting record.
-- The item icon remains unset in the validation metadata and still requires
-  either a supplied custom icon or runtime confirmation of the base-icon
-  fallback.
+- A custom 512x512 item icon is now included and hash-recorded in the
+  validation metadata.
+
+## Icon-enabled refinement
+
+- The final offline candidate contains six files, including `crafting.json`
+  and `item_icon.png`.
+- The icon was rendered from the armchair Blender source and accepted by the
+  Enshrouded Blender extension.
+- Icon display in the actual game remains unverified until runtime testing.
 
 ## Conclusion
 
