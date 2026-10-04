@@ -129,26 +129,27 @@ promotion of research into working game content.
 
 ### Advanced offline validation and publication hardening — planned
 
-53. [ ] Add GUID collision checks against current KFC3 resources and known
+53. [x] Add GUID collision checks against current KFC3 resources and known
      vanilla identities.
-54. [ ] Add automatic replacement-versus-new-item package comparison, including
+54. [x] Add automatic replacement-versus-new-item package comparison, including
      target identity, base references, registries, recipes, and file inventory.
-55. [ ] Import generated package metadata back into the project and preserve
+55. [x] Import generated package metadata back into the project and preserve
      provenance, hashes, and source-tool versions.
 56. [ ] Validate `crafting.json`, `validation.json`, icon metadata, and package
      manifests against shared schemas.
-57. [ ] Add icon and recipe previews to the project review UI.
+57. [x] Add icon and package previews to the project review UI; recipe-preview
+     detail remains part of schema validation work.
 58. [ ] Record exact Blender, external-extension, game-build, and package
      versions in reproducibility reports.
-59. [ ] Add package security checks for unsafe paths, unexpected files, size
+59. [x] Add package security checks for unsafe paths, unexpected files, size
      limits, and executable-content boundaries.
-60. [ ] Add a second new-item fixture so new-item authoring is not armchair
+60. [x] Add a second new-item fixture so new-item authoring is not armchair
      specific.
-61. [ ] Add a dry-run registration simulator for static Lua resource and
+61. [x] Add a dry-run registration simulator for static Lua resource and
      registry references without executing the package in-game.
-62. [ ] Clarify offline-verified, runtime-unverified, blocked, and unsupported
+62. [x] Clarify offline-verified, runtime-unverified, blocked, and unsupported
      states throughout the project and export UI.
-63. [ ] Add Web Catalog publication metadata for provenance, authorship,
+63. [x] Add Web Catalog publication metadata for provenance, authorship,
      licensing, compatibility, and review state.
 
 ### Later promotion work
