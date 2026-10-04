@@ -1,0 +1,29 @@
+{
+  "fixture_id": "medieval-armchair-blender-round-trip",
+  "fixture_kind": "new-model-and-replacement",
+  "source_label": "F:/Enshrouded Blender Files/Tests/medieval_armchair/medieval_armchair",
+  "source_files": {
+    "mod.json": {"sha256": "e195b9a3a5ae2284a4fb01584c36802a5dca86ca8250e0cad8fa193032c0872e"},
+    "render_data.bin": {"sha256": "506880f06bb468c45b6e291ff9248f46fcab03235c8ac6f4989273f89235f6da", "size": 7488},
+    "validation.json": {"sha256": "9c7718bd2be7881cc793854c754e16e2a6d5260df90a9be18ed834f0ae357cbc"},
+    "src/mod.lua": {"sha256": "4e8569c34286fa3b798cd4fc61065dddc703ff7179a5819b64f87611c92a5bc6"}
+  },
+  "target": {
+    "model_name": "global_props_roughwood_chair_01_a",
+    "target_guid": "bf987fd7-a1a7-473d-858d-afff4782fb19",
+    "base_template_guid": "02d0d4e3-f04f-464d-a6f5-077534be1d24",
+    "base_item_guid": "dd72650b-fef9-4213-8a8c-012e29e8d128",
+    "vertex_count": 288,
+    "index_count": 288,
+    "full_topology": true
+  },
+  "evidence_state": {
+    "package_generation": "verified",
+    "package_structure": "verified",
+    "in_game_installation": "unverified",
+    "visuals": "unverified",
+    "placement": "unverified",
+    "persistence": "unverified",
+    "multiplayer": "unverified"
+  }
+}

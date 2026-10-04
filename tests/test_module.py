@@ -9,6 +9,13 @@ from src.content import bed_template, create_furniture_project, prepare_bed_vert
 
 
 class ContentCreatorTests(unittest.TestCase):
+    def test_medieval_armchair_reference_fixture_is_offline_only(self):
+        fixture = json.loads((Path(__file__).parent / "fixtures" / "medieval_armchair.reference.json").read_text(encoding="utf-8"))
+        self.assertEqual(fixture["target"]["model_name"], "global_props_roughwood_chair_01_a")
+        self.assertEqual(fixture["target"]["vertex_count"], 288)
+        self.assertEqual(fixture["evidence_state"]["package_generation"], "verified")
+        self.assertEqual(fixture["evidence_state"]["in_game_installation"], "unverified")
+
     def test_furniture_design_is_design_only(self):
         result = validate_design(ModuleContext("embervault.content-creator", "research", "EV-OP-1"),
                                  "furniture", ["assets/chair.png"])
