@@ -102,6 +102,10 @@ class ContentCreatorWindow(QMainWindow):
         layout.addWidget(self.status)
         self.preview_list = QListWidget()
         layout.addWidget(self.preview_list)
+        self.checklist = QListWidget()
+        self.checklist.setMaximumHeight(130)
+        layout.addWidget(QLabel("Pre-export review checklist"))
+        layout.addWidget(self.checklist)
         self.capabilities = QLabel("Capabilities: choose a workflow to inspect support.")
         layout.addWidget(self.capabilities)
         self.verification = QLabel("Verification: no project loaded.")
@@ -224,6 +228,9 @@ class ContentCreatorWindow(QMainWindow):
     def preview(self) -> None:
         self.project = self._read_project(); issues = self.project.validate(); self.preview_list.clear()
         self._update_project_summary()
+        self.checklist.clear()
+        for item in self.project.export_checklist():
+            self.checklist.addItem(f"{item['state'].upper()}: {item['check']} — {item['details']}")
         if issues:
             self.status.setText("Needs review: " + " ".join(issues)); return
         for key, value in self.project.manifest()["project"].items():

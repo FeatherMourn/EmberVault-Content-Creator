@@ -293,8 +293,19 @@ class FurnitureProject:
         issues = self.review_issues()
         return {"ready": not issues, "issues": issues, "preview_hash": self.preview()["preview_hash"]}
 
+    def export_checklist(self) -> list[dict]:
+        review = self.export_review()
+        return [
+            {"check": "Project fields", "state": "pass" if not self.validate() else "blocked", "details": "Required project data is valid." if not self.validate() else "Project data needs correction."},
+            {"check": "Evidence review", "state": "pass" if self.evidence and not any(record.get("state") == "contradicted" for record in self.evidence) else "blocked", "details": f"{len(self.evidence)} evidence record(s) attached."},
+            {"check": "Compatibility", "state": "warning" if self.compatibility_warnings() else "pass", "details": "; ".join(self.compatibility_warnings()) or "No recorded compatibility warnings."},
+            {"check": "Design-only boundary", "state": "pass", "details": "Live game files remain untouched."},
+            {"check": "Review readiness", "state": "pass" if review["ready"] else "blocked", "details": "Ready for export." if review["ready"] else "Open: " + " ".join(review["issues"])},
+        ]
+
     def manifest(self) -> dict:
-        return {
+        payload = {
+            "manifest_version": 1,
             "schema_version": 1,
             "schema_id": "https://embervault.dev/contracts/content-project-export.schema.json",
             "application": "EmberVault Content Creator",
@@ -318,6 +329,14 @@ class FurnitureProject:
             "evidence": list(self.evidence),
             "live_game_files_touched": False,
         }
+        encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        payload["export_metadata"] = {
+            "project_hash": hashlib.sha256(encoded).hexdigest(),
+            "preview_hash": self.preview()["preview_hash"],
+            "file_inventory": sorted(self.blender_handoff.get("package_files", [])),
+            "checklist": self.export_checklist(),
+        }
+        return payload
 
     def export(self, destination: Path) -> Path:
         issues = self.validate()
