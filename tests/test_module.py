@@ -138,6 +138,23 @@ class ContentCreatorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "relative"):
             project.set_blender_handoff("repo", "tool", "blender", "build", ["guid"], ["../mod.json"])
 
+    def test_blender_package_hash_inventory_and_review_report(self):
+        with TemporaryDirectory() as folder:
+            root = Path(folder)
+            for name in ("mod.json", "validation.json", "render_data.bin", "src/mod.lua"):
+                target = root / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(name, encoding="utf-8")
+            project = create_furniture_project("Armchair package")
+            project.set_blender_handoff("repo", "tool", "blender", "build", ["guid"], ["mod.json", "validation.json", "render_data.bin", "src/mod.lua"])
+            self.assertEqual(project.validate_blender_package(project.blender_handoff["package_files"]), [])
+            inventory = project.hash_blender_package(root)
+            self.assertEqual(inventory["mod.json"]["state"], "present")
+            self.assertTrue(inventory["mod.json"]["sha256"])
+            report = project.blender_review_report()
+            self.assertTrue(report["ready_for_round_trip"])
+            self.assertEqual(report["runtime_testing"], "not_started")
+
     def test_preview_is_deterministic_and_design_only(self):
         project = bed_template()
         first, second = project.preview(), project.preview()

@@ -382,6 +382,38 @@ class FurnitureProject:
             self.blender_handoff["validation_state"] = "validated" if not issues else "incomplete"
         return issues
 
+    def hash_blender_package(self, package_root: Path) -> dict:
+        """Hash the recorded package files without executing or installing them."""
+        root = Path(package_root)
+        if not root.is_dir():
+            raise ValueError("Blender package root must be a directory.")
+        files = self.blender_handoff.get("package_files", [])
+        inventory = {}
+        for relative in files:
+            candidate = root / relative
+            if Path(relative).is_absolute() or ".." in Path(relative).parts:
+                raise ValueError("Blender package files must remain relative to the package root.")
+            if not candidate.is_file():
+                inventory[str(Path(relative).as_posix())] = {"state": "missing"}
+                continue
+            digest = hashlib.sha256(candidate.read_bytes()).hexdigest()
+            inventory[str(Path(relative).as_posix())] = {"state": "present", "size": candidate.stat().st_size, "sha256": digest}
+        self.blender_handoff["file_inventory"] = inventory
+        self.blender_handoff["inventory_state"] = "complete" if all(item["state"] == "present" for item in inventory.values()) else "incomplete"
+        return inventory
+
+    def blender_review_report(self) -> dict:
+        handoff = self.blender_handoff
+        return {
+            "ready_for_round_trip": bool(handoff) and handoff.get("validation_state") == "validated" and handoff.get("inventory_state") == "complete",
+            "validation_state": handoff.get("validation_state", "unverified"),
+            "inventory_state": handoff.get("inventory_state", "unverified"),
+            "tool_version": handoff.get("tool_version", "unknown"),
+            "blender_version": handoff.get("blender_version", "unknown"),
+            "game_build": handoff.get("game_build", "unknown"),
+            "runtime_testing": "not_started",
+        }
+
     def add_resource_metadata(self, resource_type: str, resource_id: str, source: str) -> None:
         record = {"resource_type": resource_type.strip(), "resource_id": resource_id.strip(), "source": source.strip()}
         if not all(record.values()):
