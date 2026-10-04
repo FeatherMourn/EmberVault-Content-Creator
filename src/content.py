@@ -113,6 +113,26 @@ def import_generated_package(package_root: Path) -> dict:
     return {"files": imported, "executed": False, "installed": False}
 
 
+def audit_package_security(package_root: Path, max_file_size: int = 50_000_000) -> list[str]:
+    """Audit package contents without opening or executing code."""
+    root = Path(package_root)
+    allowed = {"mod.json", "validation.json", "crafting.json", "item_icon.png", "render_data.bin", "src/mod.lua"}
+    issues = []
+    if not root.is_dir():
+        return ["Package root is not a directory."]
+    for path in root.rglob("*"):
+        if not path.is_file():
+            continue
+        relative = path.relative_to(root).as_posix()
+        if relative not in allowed:
+            issues.append(f"Unexpected package file: {relative}")
+        if path.stat().st_size > max_file_size:
+            issues.append(f"Package file exceeds size limit: {relative}")
+        if Path(relative).is_absolute() or ".." in Path(relative).parts:
+            issues.append(f"Unsafe package path: {relative}")
+    return issues
+
+
 class BlueprintLibrary:
     """Local, design-only library of reusable Content Creator projects."""
 

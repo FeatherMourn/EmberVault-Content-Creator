@@ -7,7 +7,8 @@ from embervault_sdk import ModuleContext
 from src.module import validate_design
 from src.content import (BlueprintLibrary, bed_template, create_furniture_project,
                          compare_package_metadata, import_package_metadata,
-                         import_generated_package, prepare_bed_vertical_slice,
+                         audit_package_security, import_generated_package,
+                         prepare_bed_vertical_slice,
                          reproducibility_report, validate_export_contract,
                          validate_guid_collisions)
 
@@ -230,6 +231,14 @@ class ContentCreatorTests(unittest.TestCase):
             imported = import_generated_package(root)
             self.assertIn("crafting.json", imported["files"])
             self.assertFalse(imported["executed"])
+
+    def test_package_security_audit_rejects_unexpected_files(self):
+        with TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root / "validation.json").write_text("{}", encoding="utf-8")
+            (root / "unexpected.exe").write_bytes(b"not executed")
+            issues = audit_package_security(root)
+            self.assertTrue(any("Unexpected package file" in issue for issue in issues))
 
     def test_public_record_excludes_private_evidence_sources(self):
         with TemporaryDirectory() as folder:
