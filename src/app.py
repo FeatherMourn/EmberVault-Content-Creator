@@ -79,8 +79,13 @@ class ContentCreatorWindow(QMainWindow):
         export.clicked.connect(self.export_manifest)
         save = QPushButton("Save project"); save.clicked.connect(self.save_project)
         open_project = QPushButton("Open project"); open_project.clicked.connect(self.open_project)
+        snapshot = QPushButton("Create recovery snapshot"); snapshot.clicked.connect(self.create_snapshot)
+        undo = QPushButton("Undo last snapshot"); undo.clicked.connect(self.undo_snapshot)
+        compatibility = QPushButton("Check compatibility")
+        compatibility.clicked.connect(self.check_compatibility)
         actions.addWidget(template); actions.addWidget(preview); actions.addWidget(save)
-        actions.addWidget(open_project); actions.addWidget(export)
+        actions.addWidget(open_project); actions.addWidget(snapshot); actions.addWidget(undo)
+        actions.addWidget(compatibility); actions.addWidget(export)
         layout.addLayout(actions)
         self.status = QLabel("No furniture project loaded.")
         layout.addWidget(self.status)
@@ -197,6 +202,39 @@ class ContentCreatorWindow(QMainWindow):
         self.status.setText(("Review required: " + " ".join(review["issues"])) if not review["ready"]
                             else "Furniture design preview ready for export. Live game files are untouched.")
 
+    def create_snapshot(self) -> None:
+        try:
+            self.project = self._read_project()
+            self.project.snapshot("UI checkpoint")
+            self._update_project_summary()
+            self.status.setText(f"Recovery snapshot created ({len(self.project.history)} saved).")
+        except ValueError as exc:
+            self.status.setText("Snapshot blocked: " + str(exc))
+
+    def undo_snapshot(self) -> None:
+        try:
+            self.project.undo()
+            self._populate_fields()
+            self.status.setText("Restored the previous recovery snapshot.")
+        except ValueError as exc:
+            self.status.setText("Undo unavailable: " + str(exc))
+
+    def check_compatibility(self) -> None:
+        warnings = self.project.compatibility_warnings()
+        self.status.setText("Compatibility: " + (" ".join(warnings) if warnings else "no recorded mismatches."))
+
+    def _populate_fields(self) -> None:
+        self.name.setText(self.project.name); self.description.setText(self.project.description)
+        self.category.setCurrentText(self.project.category); self.width.setValue(self.project.width)
+        self.height.setValue(self.project.height); self.depth.setValue(self.project.depth)
+        self.materials.setText(", ".join(self.project.materials)); self.assets.setText(", ".join(self.project.asset_references))
+        self.workflow.setCurrentText(self.project.workflow_mode)
+        self.donor_item.setText(str(self.project.donor_item_id or "")); self.donor_recipe.setText(str(self.project.donor_recipe_id or ""))
+        self.target_guid.setText(self.project.target_model_guid or ""); self.base_template_guid.setText(self.project.base_template_guid or "")
+        self.base_item_guid.setText(self.project.base_item_guid or "")
+        self.verification.setText("Verification: " + ", ".join(f"{key}={value}" for key, value in self.project.verification.items()))
+        self._update_project_summary(); self._update_inline_validation()
+
     def save_project(self) -> None:
         self.project = self._read_project()
         destination, _ = QFileDialog.getSaveFileName(self, "Save Content Creator Project", "", "Content Creator Project (*.json)")
@@ -214,20 +252,8 @@ class ContentCreatorWindow(QMainWindow):
             return
         try:
             self.project = FurnitureProject.load(Path(source))
-            self.name.setText(self.project.name); self.description.setText(self.project.description)
-            self.category.setCurrentText(self.project.category); self.width.setValue(self.project.width)
-            self.height.setValue(self.project.height); self.depth.setValue(self.project.depth)
-            self.materials.setText(", ".join(self.project.materials))
-            self.assets.setText(", ".join(self.project.asset_references))
-            self.workflow.setCurrentText(self.project.workflow_mode if self.project.workflow_mode in {"replacement", "new-model"} else "replacement")
-            self.donor_item.setText(str(self.project.donor_item_id or ""))
-            self.donor_recipe.setText(str(self.project.donor_recipe_id or ""))
-            self.target_guid.setText(self.project.target_model_guid or "")
-            self.base_template_guid.setText(self.project.base_template_guid or "")
-            self.base_item_guid.setText(self.project.base_item_guid or "")
+            self._populate_fields()
             self.evidence_title.clear(); self.evidence_source.clear()
-            self.verification.setText("Verification: " + ", ".join(f"{key}={value}" for key, value in self.project.verification.items()))
-            self._update_project_summary()
             self.status.setText(f"Project opened: {source}")
         except ValueError as exc:
             QMessageBox.warning(self, "Project could not be opened", str(exc))

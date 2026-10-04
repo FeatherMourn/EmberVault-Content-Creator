@@ -53,6 +53,7 @@ class FurnitureProject:
     base_item_guid: str = ""
     evidence: list[dict] = field(default_factory=list)
     blender_handoff: dict = field(default_factory=dict)
+    history: list[dict] = field(default_factory=list)
     verification: dict[str, str] = field(default_factory=lambda: {
         "registration": "unverified",
         "visuals": "unverified",
@@ -78,6 +79,43 @@ class FurnitureProject:
         temporary.write_text(json.dumps(self.to_project_dict(), indent=2) + "\n", encoding="utf-8")
         temporary.replace(destination)
         return destination
+
+    def snapshot(self, label: str = "checkpoint") -> dict:
+        """Record a portable recovery snapshot without touching game files."""
+        snapshot = {
+            "label": label.strip() or "checkpoint",
+            "project": self.to_project_dict(),
+        }
+        self.history.append(snapshot)
+        return snapshot
+
+    def restore_snapshot(self, snapshot: dict) -> None:
+        payload = snapshot.get("project", {})
+        restored = payload.get("project", {})
+        if payload.get("project_schema_version") != PROJECT_SCHEMA_VERSION or restored.get("project_id") != self.project_id:
+            raise ValueError("Snapshot does not belong to this project or uses an unsupported version.")
+        allowed = {field.name for field in self.__dataclass_fields__.values() if field.name != "history"}
+        for key, value in restored.items():
+            if key in allowed:
+                setattr(self, key, value)
+
+    def undo(self) -> None:
+        if len(self.history) < 2:
+            raise ValueError("No earlier project snapshot is available.")
+        current = self.history.pop()
+        self.restore_snapshot(self.history[-1])
+        self.history.append(current)
+
+    def compatibility_warnings(self, blender_version: str = "", game_build: str = "") -> list[str]:
+        warnings = []
+        handoff = self.blender_handoff
+        if handoff and blender_version and handoff.get("blender_version") != blender_version:
+            warnings.append("Blender version differs from the recorded handoff.")
+        if handoff and game_build and handoff.get("game_build") != game_build:
+            warnings.append("Game build differs from the recorded handoff.")
+        if not handoff:
+            warnings.append("No external-tool handoff has been recorded.")
+        return warnings
 
     @classmethod
     def load(cls, source: Path) -> "FurnitureProject":
