@@ -194,6 +194,18 @@ class ContentCreatorTests(unittest.TestCase):
             self.assertEqual(record["application_state"], "design-only")
             self.assertNotIn("private", json.dumps(record).lower())
 
+    def test_public_record_passes_catalog_handoff_validation(self):
+        project = bed_template()
+        record = BlueprintLibrary(Path("." )).public_record(project)
+        self.assertEqual(BlueprintLibrary.validate_public_record(record), [])
+
+    def test_blueprint_library_filters_by_evidence_state(self):
+        with TemporaryDirectory() as folder:
+            library = BlueprintLibrary(Path(folder))
+            library.save(bed_template(), ["bed"])
+            self.assertEqual(len(library.search(evidence_state="review-required")), 1)
+            self.assertEqual(len(library.search(evidence_state="reviewed")), 0)
+
 
 if __name__ == "__main__":
     unittest.main()

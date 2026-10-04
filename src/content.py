@@ -82,7 +82,7 @@ class BlueprintLibrary:
         self._log("blueprint_saved", project.project_id, {"version": version, "tags": record["blueprint"]["tags"]})
         return destination
 
-    def search(self, query: str = "") -> list[dict]:
+    def search(self, query: str = "", evidence_state: str | None = None, game_build: str | None = None) -> list[dict]:
         query = query.strip().lower()
         results = []
         for source in sorted(self.root.glob("*.json")):
@@ -92,7 +92,8 @@ class BlueprintLibrary:
                 continue
             blueprint = record.get("blueprint", {})
             haystack = " ".join(str(value).lower() for value in [blueprint, record.get("project", {})])
-            if not query or query in haystack:
+            compatibility = record.get("project", {}).get("blender_handoff", {})
+            if (not query or query in haystack) and (not evidence_state or blueprint.get("evidence_state") == evidence_state) and (not game_build or compatibility.get("game_build") == game_build):
                 results.append({"path": source, "record": record})
         return results
 
@@ -132,8 +133,22 @@ class BlueprintLibrary:
             "live_game_files_touched": False,
         }
 
+    @staticmethod
+    def validate_public_record(record: dict) -> list[str]:
+        required = {"record_type", "record_version", "title", "category", "workflow_mode", "preview_hash", "evidence_state", "compatibility", "application_state", "live_game_files_touched"}
+        issues = [f"missing:{key}" for key in sorted(required - record.keys())]
+        if record.get("record_type") != "content-blueprint": issues.append("record_type")
+        if record.get("record_version") != 1: issues.append("record_version")
+        if record.get("application_state") != "design-only": issues.append("application_state")
+        if record.get("live_game_files_touched") is not False: issues.append("live_game_files_touched")
+        if not isinstance(record.get("compatibility"), dict): issues.append("compatibility")
+        return issues
+
     def publish_record(self, project: "FurnitureProject", destination: Path) -> Path:
         record = self.public_record(project)
+        issues = self.validate_public_record(record)
+        if issues:
+            raise ValueError("Public record invalid: " + " ".join(issues))
         destination = Path(destination)
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
