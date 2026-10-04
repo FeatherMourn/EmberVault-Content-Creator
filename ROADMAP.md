@@ -13,6 +13,13 @@ validation, and export packages.
 Excluded: direct live game mutation, unverified runtime claims, and automatic
 promotion of research into working game content.
 
+## Current state — 2026-10-04
+
+The read-only Mod Research client now validates the expanded 19-record,
+design-only handoff. It preserves evidence counts, confidence, limitations,
+open questions, contradiction warnings, and an explicit false runtime-approval
+flag. Authoring UI integration remains active work.
+
 ## Dependencies
 
 - EmberVault-Contracts: project and export schemas.
@@ -42,7 +49,8 @@ promotion of research into working game content.
    assets, while keeping unsupported content types explicit.
 8. [ ] Add donor, recipe, resource, and asset-reference selection with path
    safety validation.
-9. [ ] Add donor search and resource metadata sourced from Mod Research.
+9. [x] Add the initial read-only donor search and resource metadata client from
+   Mod Research; UI integration remains active.
 10. [ ] Add an external-tool handoff panel for EnshroudedBlenderTools, recording the
    repository/version, Blender version, game build, source GUIDs, generated
    package paths, and tool validation results.

@@ -15,6 +15,14 @@ def load_research_handoff(path: Path) -> list[dict[str, Any]]:
     records = payload.get("records")
     if not isinstance(records, list):
         raise ValueError("research handoff records must be a list")
+    for record in records:
+        required = {"id", "kind", "identity", "build_scope", "confidence", "supported_claims",
+                    "unsupported_claims", "open_questions", "evidence", "evidence_count",
+                    "contradictions", "runtime_approval"}
+        if not required.issubset(record):
+            raise ValueError("research handoff record is incomplete")
+        if record["runtime_approval"] is not False or record["evidence_count"] != len(record["evidence"]):
+            raise ValueError("research handoff cannot grant runtime approval or misstate evidence")
     return records
 
 
