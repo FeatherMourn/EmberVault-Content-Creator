@@ -7,6 +7,7 @@ The standalone EmberVault Content Creator application is the design workspace fo
 - Standalone Qt application entry point in `src/app.py`.
 - Furniture project model with validation and design-only manifest export.
 - Tested bed workflow as the first furniture template.
+- Donor-preserving bed runtime plan using the validated item and recipe donor IDs.
 - No live game files are modified.
 
 Run the application with `python -m src.app` after installing PySide6. Use `--smoke-test` for a headless startup check.

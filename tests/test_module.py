@@ -23,6 +23,8 @@ class ContentCreatorTests(unittest.TestCase):
         project = bed_template()
         self.assertEqual(project.category, "bed")
         self.assertEqual(project.source_template, "tested-bed-workflow")
+        self.assertEqual(project.donor_item_id, 2940001508)
+        self.assertEqual(project.donor_recipe_id, 3531872774)
         self.assertFalse(project.manifest()["live_game_files_touched"])
 
     def test_furniture_manifest_exports(self):

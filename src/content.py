@@ -17,6 +17,10 @@ class FurnitureProject:
     materials: list[str] = field(default_factory=list)
     asset_references: list[str] = field(default_factory=list)
     source_template: str = ""
+    donor_item_id: int | None = None
+    donor_recipe_id: int | None = None
+    clone_item_id: int | None = None
+    clone_recipe_id: int | None = None
 
     def validate(self) -> list[str]:
         issues = []
@@ -35,6 +39,14 @@ class FurnitureProject:
             "application_state": "design-only",
             "content_type": "furniture",
             "project": asdict(self),
+            "runtime_plan": {
+                "strategy": "donor-preserving-clone",
+                "donor_item_id": self.donor_item_id,
+                "donor_recipe_id": self.donor_recipe_id,
+                "clone_item_id": self.clone_item_id,
+                "clone_recipe_id": self.clone_recipe_id,
+                "requires_build_validation": True,
+            },
             "live_game_files_touched": False,
         }
 
@@ -58,4 +70,6 @@ def bed_template() -> FurnitureProject:
         depth=3.0,
         materials=["wood", "fabric"],
         source_template="tested-bed-workflow",
+        donor_item_id=2940001508,
+        donor_recipe_id=3531872774,
     )
