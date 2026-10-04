@@ -29,6 +29,14 @@ class ContentCreatorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Workflow mode"):
             project.apply_reference_fixture({}, "unsupported")
 
+    def test_replacement_and_new_model_validation_are_separate(self):
+        self.assertNotIn("Replacement workflow requires", bed_template().validate())
+        new_model = create_furniture_project("New Chair", "chair")
+        new_model.workflow_mode = "new-model"
+        self.assertTrue(any("New-model workflow requires" in issue for issue in new_model.validate()))
+        new_model.apply_reference_fixture(json.loads((Path(__file__).parent / "fixtures" / "medieval_armchair.reference.json").read_text(encoding="utf-8")))
+        self.assertNotIn("New-model workflow requires", new_model.validate())
+
     def test_furniture_design_is_design_only(self):
         result = validate_design(ModuleContext("embervault.content-creator", "research", "EV-OP-1"),
                                  "furniture", ["assets/chair.png"])

@@ -105,6 +105,12 @@ class FurnitureProject:
             issues.append("A furniture name is required.")
         if any(value <= 0 for value in (self.width, self.height, self.depth)):
             issues.append("Furniture dimensions must be greater than zero.")
+        if self.workflow_mode not in {"replacement", "new-model", "donor-preserving-clone"}:
+            issues.append("Workflow mode must be replacement, new-model, or donor-preserving-clone.")
+        elif self.workflow_mode == "replacement" and (self.donor_item_id is None or self.donor_recipe_id is None):
+            issues.append("Replacement workflow requires a vanilla donor item and recipe.")
+        elif self.workflow_mode == "new-model" and not all((self.target_model_guid, self.base_template_guid, self.base_item_guid)):
+            issues.append("New-model workflow requires target, base template, and base item GUIDs.")
         if self.category not in SUPPORTED_FURNITURE_CATEGORIES:
             issues.append(f"Unsupported furniture category: {self.category}.")
         if any(Path(ref).is_absolute() or ".." in Path(ref).parts for ref in self.asset_references):
