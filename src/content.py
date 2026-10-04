@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 import json
 import hashlib
+from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 
@@ -154,6 +155,20 @@ class BlueprintLibrary:
         destination.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
         self._log("catalog_record_prepared", project.project_id, {"destination": "sanitized-public-record"})
         return destination
+
+    def catalog_snapshot(self, projects: list["FurnitureProject"]) -> dict:
+        """Create a sanitized public-catalog envelope for Web Catalog handoff."""
+        records = [self.public_record(project) for project in projects]
+        return {
+            "schema_version": 1,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "contract_versions": {
+                "module_manifest": 1, "package_manifest": 1, "research_record": 1,
+                "content_project": 1, "tuning_adapter": 1,
+            },
+            "packages": [], "modules": [], "tuning_adapters": [], "knowledge": [],
+            "research": [], "content_projects": records,
+        }
 
 
 def validate_export_contract(payload: dict) -> list[str]:

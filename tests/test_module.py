@@ -206,6 +206,15 @@ class ContentCreatorTests(unittest.TestCase):
             self.assertEqual(len(library.search(evidence_state="review-required")), 1)
             self.assertEqual(len(library.search(evidence_state="reviewed")), 0)
 
+    def test_catalog_snapshot_contains_sanitized_content_projects(self):
+        with TemporaryDirectory() as folder:
+            project = bed_template()
+            snapshot = BlueprintLibrary(Path(folder)).catalog_snapshot([project])
+            self.assertEqual(snapshot["schema_version"], 1)
+            self.assertTrue(snapshot["generated_at"])
+            self.assertEqual(len(snapshot["content_projects"]), 1)
+            self.assertFalse(snapshot["content_projects"][0]["live_game_files_touched"])
+
 
 if __name__ == "__main__":
     unittest.main()
