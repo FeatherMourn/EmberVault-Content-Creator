@@ -36,31 +36,43 @@ promotion of research into working game content.
 ### Content Creator 2.0 — active build sequence
 
 5. [ ] Create and open projects with deterministic project identifiers.
-6. [ ] Build structured authoring for furniture, buildings, recipes, and assets.
-7. [ ] Add donor, recipe, resource, and asset-reference selection with path
+6. [ ] Build a real project workspace with save, load, autosave, versioning,
+   recovery, and corruption handling.
+7. [ ] Build guided authoring workflows for furniture, buildings, recipes, and
+   assets, while keeping unsupported content types explicit.
+8. [ ] Add donor, recipe, resource, and asset-reference selection with path
    safety validation.
-8. [ ] Add an external-tool handoff for EnshroudedBlenderTools, recording the
+9. [ ] Add donor search and resource metadata sourced from Mod Research.
+10. [ ] Add an external-tool handoff panel for EnshroudedBlenderTools, recording the
    repository/version, Blender version, game build, source GUIDs, generated
    package paths, and tool validation results.
-9. [ ] Add evidence records, verification-state editing, and open-question
-   tracking.
-10. [ ] Add deterministic previews and a clear separation between design data,
-   runtime plans, and unsupported claims.
-11. [ ] Validate project exports against the shared Content Project Export
+11. [ ] Add visible verification states for verified, partial, unknown, and
+    blocked results.
+12. [ ] Add evidence attachment, provenance display, contradiction warnings,
+    and open-question tracking.
+13. [ ] Add deterministic previews and a clear separation between design data,
+    runtime plans, and unsupported claims.
+14. [ ] Validate generated EML/package structures without installing them.
+15. [ ] Validate project exports against the shared Content Project Export
     contract and sanitize public-facing fields.
-12. [ ] Add save/load persistence with corruption and incompatible-version
-    handling.
-13. [ ] Connect the standalone project model to the Control Center module
+16. [ ] Add import/export compatibility checks and clear, actionable error
+    messages.
+17. [ ] Connect the standalone project model to the Control Center module
     lifecycle without allowing live-game mutation.
-14. [ ] Build the first complete bed workflow from authoring through export,
+18. [ ] Add Control Center operations for review, validation, recovery, and
+    package handoff.
+19. [ ] Build the first complete bed workflow from project creation through
+    donor selection, evidence attachment, Blender handoff, validation, and
+    export.
+20. [ ] Add end-to-end tests, clean-install packaging checks, documentation,
     including registration evidence and unresolved visual/runtime questions.
-15. [ ] Add end-to-end tests, clean-install packaging checks, documentation,
-    and GitHub backup.
+21. [ ] Add GitHub backup and a reviewable release artifact for the completed
+    bed vertical slice.
 
 ### Later promotion work
 
-15. [ ] Publish only sanitized, review-approved exports to EmberVault Web.
-16. [ ] Add runtime adapters only when current-build evidence proves behavior,
+22. [ ] Publish only sanitized, review-approved exports to EmberVault Web.
+23. [ ] Add runtime adapters only when current-build evidence proves behavior,
     persistence, multiplayer impact, and rollback.
 
 ## Definition of done
