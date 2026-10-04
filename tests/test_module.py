@@ -79,6 +79,19 @@ class ContentCreatorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "donor item"):
             project.set_donor(0, 456)
 
+    def test_evidence_review_tracks_provenance_and_open_questions(self):
+        project = create_furniture_project("Review Bed")
+        project.add_evidence("Blender handoff", "EnshroudedBlenderTools", game_build="1076226", tool_version="0.25.0")
+        project.set_verification("registration", "verified")
+        self.assertEqual(project.evidence[0]["game_build"], "1076226")
+        self.assertTrue(project.review_issues())
+        self.assertTrue(project.remove_evidence("Blender handoff"))
+
+    def test_evidence_review_blocks_contradictions(self):
+        project = create_furniture_project("Contradictory Bed")
+        project.add_evidence("Conflicting probe", "test", state="contradicted")
+        self.assertIn("Contradictory evidence requires review.", project.review_issues())
+
 
 if __name__ == "__main__":
     unittest.main()

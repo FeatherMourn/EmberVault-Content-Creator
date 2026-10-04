@@ -120,6 +120,37 @@ class FurnitureProject:
             raise ValueError("Resource metadata requires a type, id, and source.")
         self.evidence.append({"title": f"Resource metadata: {record['resource_type']}", **record, "state": "observed"})
 
+    def set_verification(self, area: str, state: str) -> None:
+        if area not in self.verification:
+            raise ValueError(f"Unknown verification area: {area}.")
+        if state not in {"verified", "partial", "unverified", "blocked", "not_applicable"}:
+            raise ValueError(f"Unknown verification state: {state}.")
+        self.verification[area] = state
+
+    def add_evidence(self, title: str, source: str, state: str = "observed", **provenance: str) -> None:
+        title, source = title.strip(), source.strip()
+        if not title or not source:
+            raise ValueError("Evidence requires a title and source.")
+        record = {"title": title, "source": source, "state": state}
+        record.update({key: value.strip() for key, value in provenance.items() if isinstance(value, str) and value.strip()})
+        self.evidence.append(record)
+
+    def remove_evidence(self, title: str) -> bool:
+        before = len(self.evidence)
+        self.evidence = [record for record in self.evidence if record.get("title") != title]
+        return len(self.evidence) != before
+
+    def review_issues(self) -> list[str]:
+        issues = self.validate()
+        if not self.evidence:
+            issues.append("At least one evidence record is required for review.")
+        if any(value in {"unverified", "partial"} for value in self.verification.values()):
+            issues.append("Unverified or partial verification areas remain open.")
+        states = {record.get("state") for record in self.evidence}
+        if "contradicted" in states:
+            issues.append("Contradictory evidence requires review.")
+        return issues
+
     def manifest(self) -> dict:
         return {
             "schema_version": 1,
