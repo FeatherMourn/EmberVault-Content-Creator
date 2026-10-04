@@ -28,6 +28,7 @@ class FurnitureProject:
     clone_item_id: int | None = None
     clone_recipe_id: int | None = None
     evidence: list[dict] = field(default_factory=list)
+    blender_handoff: dict = field(default_factory=dict)
     verification: dict[str, str] = field(default_factory=lambda: {
         "registration": "unverified",
         "visuals": "unverified",
@@ -91,6 +92,10 @@ class FurnitureProject:
             if not isinstance(record, dict) or not str(record.get("title", "")).strip():
                 issues.append("Each evidence record needs a title.")
                 break
+        if self.blender_handoff:
+            for key in ("repository", "tool_version", "blender_version", "game_build", "source_guids", "package_files"):
+                if not self.blender_handoff.get(key):
+                    issues.append(f"Blender handoff is missing {key}.")
         return issues
 
     def set_dimensions(self, width: float, height: float, depth: float) -> None:
@@ -113,6 +118,28 @@ class FurnitureProject:
             raise ValueError("A positive donor recipe id is required.")
         self.donor_item_id = item_id
         self.donor_recipe_id = recipe_id
+
+    def set_blender_handoff(self, repository: str, tool_version: str, blender_version: str,
+                            game_build: str, source_guids: list[str], package_files: list[str]) -> None:
+        values = [repository.strip(), tool_version.strip(), blender_version.strip(), game_build.strip()]
+        if not all(values) or not source_guids or not package_files:
+            raise ValueError("Blender handoff requires tool provenance, source GUIDs, and package files.")
+        if any(Path(item).is_absolute() or ".." in Path(item).parts for item in package_files):
+            raise ValueError("Blender package files must remain relative to the export package.")
+        self.blender_handoff = {
+            "repository": repository.strip(), "tool_version": tool_version.strip(),
+            "blender_version": blender_version.strip(), "game_build": game_build.strip(),
+            "source_guids": list(source_guids), "package_files": list(package_files),
+            "validation_state": "unverified",
+        }
+
+    def validate_blender_package(self, available_files: list[str]) -> list[str]:
+        expected = {"mod.json", "validation.json", "render_data.bin", "src/mod.lua"}
+        available = {str(Path(item).as_posix()) for item in available_files}
+        issues = [f"Missing generated package file: {item}" for item in sorted(expected - available)]
+        if self.blender_handoff:
+            self.blender_handoff["validation_state"] = "validated" if not issues else "incomplete"
+        return issues
 
     def add_resource_metadata(self, resource_type: str, resource_id: str, source: str) -> None:
         record = {"resource_type": resource_type.strip(), "resource_id": resource_id.strip(), "source": source.strip()}

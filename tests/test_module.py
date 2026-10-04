@@ -92,6 +92,20 @@ class ContentCreatorTests(unittest.TestCase):
         project.add_evidence("Conflicting probe", "test", state="contradicted")
         self.assertIn("Contradictory evidence requires review.", project.review_issues())
 
+    def test_blender_handoff_records_provenance_and_validates_generated_package(self):
+        project = create_furniture_project("Blender Bed")
+        project.set_blender_handoff(
+            "https://github.com/Baik90/EnshroudedBlenderTools", "0.25.0", "5.2 LTS",
+            "1076226", ["model-guid"], ["mod.json", "validation.json", "render_data.bin", "src/mod.lua"],
+        )
+        self.assertEqual(project.validate_blender_package(project.blender_handoff["package_files"]), [])
+        self.assertEqual(project.blender_handoff["validation_state"], "validated")
+
+    def test_blender_handoff_rejects_unsafe_package_paths(self):
+        project = create_furniture_project("Unsafe Handoff")
+        with self.assertRaisesRegex(ValueError, "relative"):
+            project.set_blender_handoff("repo", "tool", "blender", "build", ["guid"], ["../mod.json"])
+
 
 if __name__ == "__main__":
     unittest.main()
