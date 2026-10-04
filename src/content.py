@@ -106,6 +106,20 @@ class FurnitureProject:
         if reference not in self.asset_references:
             self.asset_references.append(reference)
 
+    def set_donor(self, item_id: int, recipe_id: int) -> None:
+        if not isinstance(item_id, int) or isinstance(item_id, bool) or item_id <= 0:
+            raise ValueError("A positive donor item id is required.")
+        if not isinstance(recipe_id, int) or isinstance(recipe_id, bool) or recipe_id <= 0:
+            raise ValueError("A positive donor recipe id is required.")
+        self.donor_item_id = item_id
+        self.donor_recipe_id = recipe_id
+
+    def add_resource_metadata(self, resource_type: str, resource_id: str, source: str) -> None:
+        record = {"resource_type": resource_type.strip(), "resource_id": resource_id.strip(), "source": source.strip()}
+        if not all(record.values()):
+            raise ValueError("Resource metadata requires a type, id, and source.")
+        self.evidence.append({"title": f"Resource metadata: {record['resource_type']}", **record, "state": "observed"})
+
     def manifest(self) -> dict:
         return {
             "schema_version": 1,

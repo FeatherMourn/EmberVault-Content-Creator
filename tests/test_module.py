@@ -66,6 +66,19 @@ class ContentCreatorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Unsupported"):
             create_furniture_project("Unknown", "vehicle")
 
+    def test_donor_and_resource_metadata_are_recorded(self):
+        project = create_furniture_project("Dining Table", "table")
+        project.set_donor(123, 456)
+        project.add_resource_metadata("RenderModel", "model-guid", "KFC3 export")
+        self.assertEqual(project.donor_item_id, 123)
+        self.assertEqual(project.donor_recipe_id, 456)
+        self.assertEqual(project.evidence[0]["resource_type"], "RenderModel")
+
+    def test_donor_ids_must_be_positive_integers(self):
+        project = create_furniture_project("Chair", "chair")
+        with self.assertRaisesRegex(ValueError, "donor item"):
+            project.set_donor(0, 456)
+
 
 if __name__ == "__main__":
     unittest.main()
