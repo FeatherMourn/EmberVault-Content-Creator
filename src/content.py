@@ -47,6 +47,10 @@ class FurnitureProject:
     donor_recipe_id: int | None = None
     clone_item_id: int | None = None
     clone_recipe_id: int | None = None
+    workflow_mode: str = "donor-preserving-clone"
+    target_model_guid: str = ""
+    base_template_guid: str = ""
+    base_item_guid: str = ""
     evidence: list[dict] = field(default_factory=list)
     blender_handoff: dict = field(default_factory=dict)
     verification: dict[str, str] = field(default_factory=lambda: {
@@ -138,6 +142,20 @@ class FurnitureProject:
             raise ValueError("A positive donor recipe id is required.")
         self.donor_item_id = item_id
         self.donor_recipe_id = recipe_id
+
+    def apply_reference_fixture(self, fixture: dict, workflow_mode: str = "new-model") -> None:
+        if workflow_mode not in {"replacement", "new-model"}:
+            raise ValueError("Workflow mode must be replacement or new-model.")
+        target = fixture.get("target", {})
+        required = ("target_guid", "base_template_guid", "base_item_guid")
+        if any(not str(target.get(key, "")).strip() for key in required):
+            raise ValueError("Reference fixture is missing target or donor GUID metadata.")
+        self.workflow_mode = workflow_mode
+        self.target_model_guid = str(target["target_guid"])
+        self.base_template_guid = str(target["base_template_guid"])
+        self.base_item_guid = str(target["base_item_guid"])
+        self.source_template = str(target.get("model_name", self.source_template))
+        self.add_evidence("Reference fixture applied", str(fixture.get("source_label", "offline fixture")), state="observed")
 
     def set_blender_handoff(self, repository: str, tool_version: str, blender_version: str,
                             game_build: str, source_guids: list[str], package_files: list[str]) -> None:

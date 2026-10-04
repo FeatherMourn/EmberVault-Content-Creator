@@ -16,6 +16,19 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertEqual(fixture["evidence_state"]["package_generation"], "verified")
         self.assertEqual(fixture["evidence_state"]["in_game_installation"], "unverified")
 
+    def test_armchair_fixture_populates_new_model_workflow(self):
+        fixture = json.loads((Path(__file__).parent / "fixtures" / "medieval_armchair.reference.json").read_text(encoding="utf-8"))
+        project = create_furniture_project("Medieval Armchair", "chair")
+        project.apply_reference_fixture(fixture)
+        self.assertEqual(project.workflow_mode, "new-model")
+        self.assertEqual(project.target_model_guid, fixture["target"]["target_guid"])
+        self.assertEqual(project.base_item_guid, fixture["target"]["base_item_guid"])
+
+    def test_fixture_workflow_rejects_unknown_mode(self):
+        project = create_furniture_project("Armchair", "chair")
+        with self.assertRaisesRegex(ValueError, "Workflow mode"):
+            project.apply_reference_fixture({}, "unsupported")
+
     def test_furniture_design_is_design_only(self):
         result = validate_design(ModuleContext("embervault.content-creator", "research", "EV-OP-1"),
                                  "furniture", ["assets/chair.png"])
