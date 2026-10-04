@@ -271,10 +271,13 @@ class ContentCreatorTests(unittest.TestCase):
             "item_icon": {"file": "item_icon.png"},
             "base_item_guid": "item",
             "base_template_guid": "template",
+            "crafting": {"recipe_guid": "recipe", "ingredients": [{"guid": "wood", "count": 5}]},
         })
         self.assertTrue(preview["new_model"])
         self.assertEqual(preview["icon"], "item_icon.png")
         self.assertTrue(preview["base_item_guid_present"])
+        self.assertTrue(preview["recipe_guid_present"])
+        self.assertEqual(preview["ingredient_count"], 1)
 
     def test_capability_matrix_separates_offline_support_from_runtime(self):
         matrix = capability_matrix("table", "new-model")

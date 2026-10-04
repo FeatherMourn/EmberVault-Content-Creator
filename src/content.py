@@ -189,6 +189,8 @@ def simulate_registration(lua_source: str) -> dict:
 
 def package_preview(metadata: dict) -> dict:
     """Return a UI-safe summary of generated package metadata."""
+    crafting = metadata.get("crafting", {}) if isinstance(metadata.get("crafting"), dict) else {}
+    ingredients = crafting.get("ingredients", [])
     return {
         "item_name": metadata.get("item_name", "unknown"),
         "new_model": metadata.get("new_model", False),
@@ -197,6 +199,8 @@ def package_preview(metadata: dict) -> dict:
         "icon": metadata.get("item_icon", {}).get("file") if isinstance(metadata.get("item_icon"), dict) else None,
         "base_item_guid_present": bool(metadata.get("base_item_guid")),
         "base_template_guid_present": bool(metadata.get("base_template_guid")),
+        "recipe_guid_present": bool(crafting.get("recipe_guid")),
+        "ingredient_count": len(ingredients) if isinstance(ingredients, list) else 0,
     }
 
 
