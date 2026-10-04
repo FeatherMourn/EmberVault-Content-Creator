@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
 import json
+import hashlib
 from pathlib import Path
 from uuid import uuid4
 
@@ -177,6 +178,29 @@ class FurnitureProject:
         if "contradicted" in states:
             issues.append("Contradictory evidence requires review.")
         return issues
+
+    def preview(self) -> dict:
+        """Return a deterministic, UI-safe summary without reading game files."""
+        summary = {
+            "project_id": self.project_id,
+            "name": self.name,
+            "category": self.category,
+            "dimensions": {"width": self.width, "height": self.height, "depth": self.depth},
+            "materials": sorted(self.materials),
+            "asset_references": sorted(self.asset_references),
+            "donor_item_id": self.donor_item_id,
+            "donor_recipe_id": self.donor_recipe_id,
+            "verification": dict(sorted(self.verification.items())),
+            "evidence_count": len(self.evidence),
+            "application_state": "design-only",
+        }
+        encoded = json.dumps(summary, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        summary["preview_hash"] = hashlib.sha256(encoded).hexdigest()
+        return summary
+
+    def export_review(self) -> dict:
+        issues = self.review_issues()
+        return {"ready": not issues, "issues": issues, "preview_hash": self.preview()["preview_hash"]}
 
     def manifest(self) -> dict:
         return {

@@ -106,6 +106,17 @@ class ContentCreatorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "relative"):
             project.set_blender_handoff("repo", "tool", "blender", "build", ["guid"], ["../mod.json"])
 
+    def test_preview_is_deterministic_and_design_only(self):
+        project = bed_template()
+        first, second = project.preview(), project.preview()
+        self.assertEqual(first["preview_hash"], second["preview_hash"])
+        self.assertEqual(first["application_state"], "design-only")
+
+    def test_export_review_blocks_open_verification_questions(self):
+        review = bed_template().export_review()
+        self.assertFalse(review["ready"])
+        self.assertIn("Unverified or partial verification areas remain open.", review["issues"])
+
 
 if __name__ == "__main__":
     unittest.main()
