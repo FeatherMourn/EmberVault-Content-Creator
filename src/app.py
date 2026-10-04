@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QWidget,
 )
 
-from .content import BlueprintLibrary, FurnitureProject, bed_template, import_package_metadata, search_donor_library
+from .content import BlueprintLibrary, FurnitureProject, bed_template, import_package_metadata, package_preview, search_donor_library
 
 
 class ContentCreatorWindow(QMainWindow):
@@ -306,6 +306,8 @@ class ContentCreatorWindow(QMainWindow):
             self.status.setText("Needs review: " + " ".join(issues)); return
         for key, value in self.project.manifest()["project"].items():
             self.preview_list.addItem(f"{key}: {value}")
+        package = self.project.manifest().get("blender_handoff", {})
+        self.preview_list.addItem(f"Package preview: {package_preview(package)}")
         review = self.project.export_review()
         self.verification.setText("Verification: " + ", ".join(f"{key}={value}" for key, value in self.project.verification.items()))
         self.status.setText(("Review required: " + " ".join(review["issues"])) if not review["ready"]
