@@ -33,19 +33,30 @@ class ContentCreatorWindow(QMainWindow):
         form = QFormLayout(furniture)
         self.name = QLineEdit()
         self.description = QLineEdit()
-        self.category = QComboBox(); self.category.addItems(["bed", "chair", "table", "storage", "other"])
+        self.category = QComboBox(); self.category.addItems(["bed", "chair", "table", "storage", "decor"])
         self.workflow = QComboBox(); self.workflow.addItems(["replacement", "new-model"])
         self.width = self._dimension(2.0)
         self.height = self._dimension(1.0)
         self.depth = self._dimension(3.0)
         self.materials = QLineEdit("wood, fabric")
         self.assets = QLineEdit()
+        self.donor_item = QLineEdit()
+        self.donor_recipe = QLineEdit()
+        self.target_guid = QLineEdit()
+        self.base_template_guid = QLineEdit()
+        self.base_item_guid = QLineEdit()
+        self.evidence_title = QLineEdit()
+        self.evidence_source = QLineEdit()
         form.addRow("Name", self.name)
         form.addRow("Description", self.description)
         form.addRow("Furniture type", self.category)
         form.addRow("Workflow", self.workflow)
         form.addRow("Width", self.width); form.addRow("Height", self.height); form.addRow("Depth", self.depth)
         form.addRow("Materials", self.materials); form.addRow("Asset references", self.assets)
+        form.addRow("Donor item ID", self.donor_item); form.addRow("Donor recipe ID", self.donor_recipe)
+        form.addRow("Target RenderModel GUID", self.target_guid)
+        form.addRow("Base template GUID", self.base_template_guid); form.addRow("Base item GUID", self.base_item_guid)
+        form.addRow("Evidence title", self.evidence_title); form.addRow("Evidence source", self.evidence_source)
         layout.addWidget(furniture)
 
         actions = QVBoxLayout()
@@ -66,6 +77,8 @@ class ContentCreatorWindow(QMainWindow):
         layout.addWidget(self.preview_list)
         self.capabilities = QLabel("Capabilities: choose a workflow to inspect support.")
         layout.addWidget(self.capabilities)
+        self.verification = QLabel("Verification: no project loaded.")
+        layout.addWidget(self.verification)
         self.workflow.currentTextChanged.connect(self._update_capabilities)
         self._update_capabilities(self.workflow.currentText())
         self.setCentralWidget(root)
@@ -82,6 +95,11 @@ class ContentCreatorWindow(QMainWindow):
         self.height.setValue(self.project.height); self.depth.setValue(self.project.depth)
         self.materials.setText(", ".join(self.project.materials))
         self.workflow.setCurrentText(self.project.workflow_mode)
+        self.donor_item.setText(str(self.project.donor_item_id or ""))
+        self.donor_recipe.setText(str(self.project.donor_recipe_id or ""))
+        self.target_guid.clear(); self.base_template_guid.clear(); self.base_item_guid.clear()
+        self.evidence_title.clear(); self.evidence_source.clear()
+        self.verification.setText("Verification: " + ", ".join(f"{key}={value}" for key, value in self.project.verification.items()))
         self.status.setText("Loaded tested bed workflow as a new furniture project.")
 
     def _read_project(self) -> FurnitureProject:
@@ -93,12 +111,25 @@ class ContentCreatorWindow(QMainWindow):
             asset_references=[item.strip() for item in self.assets.text().split(",") if item.strip()],
             source_template=self.project.source_template,
         )
-        project.workflow_mode = self.workflow.currentText()
         project.donor_item_id = self.project.donor_item_id
         project.donor_recipe_id = self.project.donor_recipe_id
         project.evidence = list(self.project.evidence)
         project.verification = dict(self.project.verification)
         project.blender_handoff = dict(self.project.blender_handoff)
+        project.workflow_mode = self.workflow.currentText()
+        for field, label in ((self.donor_item, "donor item"), (self.donor_recipe, "donor recipe")):
+            if field.text().strip():
+                try:
+                    value = int(field.text().strip())
+                except ValueError as exc:
+                    raise ValueError(f"{label} ID must be an integer.") from exc
+                if label == "donor item": project.donor_item_id = value
+                else: project.donor_recipe_id = value
+        project.target_model_guid = self.target_guid.text().strip()
+        project.base_template_guid = self.base_template_guid.text().strip()
+        project.base_item_guid = self.base_item_guid.text().strip()
+        if self.evidence_title.text().strip() or self.evidence_source.text().strip():
+            project.add_evidence(self.evidence_title.text(), self.evidence_source.text())
         return project
 
     def _update_capabilities(self, workflow: str) -> None:
@@ -117,6 +148,7 @@ class ContentCreatorWindow(QMainWindow):
         for key, value in self.project.manifest()["project"].items():
             self.preview_list.addItem(f"{key}: {value}")
         review = self.project.export_review()
+        self.verification.setText("Verification: " + ", ".join(f"{key}={value}" for key, value in self.project.verification.items()))
         self.status.setText(("Review required: " + " ".join(review["issues"])) if not review["ready"]
                             else "Furniture design preview ready for export. Live game files are untouched.")
 
@@ -143,6 +175,13 @@ class ContentCreatorWindow(QMainWindow):
             self.materials.setText(", ".join(self.project.materials))
             self.assets.setText(", ".join(self.project.asset_references))
             self.workflow.setCurrentText(self.project.workflow_mode if self.project.workflow_mode in {"replacement", "new-model"} else "replacement")
+            self.donor_item.setText(str(self.project.donor_item_id or ""))
+            self.donor_recipe.setText(str(self.project.donor_recipe_id or ""))
+            self.target_guid.setText(self.project.target_model_guid or "")
+            self.base_template_guid.setText(self.project.base_template_guid or "")
+            self.base_item_guid.setText(self.project.base_item_guid or "")
+            self.evidence_title.clear(); self.evidence_source.clear()
+            self.verification.setText("Verification: " + ", ".join(f"{key}={value}" for key, value in self.project.verification.items()))
             self.status.setText(f"Project opened: {source}")
         except ValueError as exc:
             QMessageBox.warning(self, "Project could not be opened", str(exc))
