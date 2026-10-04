@@ -11,7 +11,8 @@ from src.content import (BlueprintLibrary, bed_template, create_furniture_projec
                          prepare_bed_vertical_slice,
                          reproducibility_report, validate_export_contract,
                          simulate_registration, validate_guid_collisions,
-                         package_preview, capability_matrix)
+                         package_preview, capability_matrix,
+                         validate_crafting_metadata, validate_package_manifest)
 
 
 class ContentCreatorTests(unittest.TestCase):
@@ -249,6 +250,12 @@ class ContentCreatorTests(unittest.TestCase):
             (root / "unexpected.exe").write_bytes(b"not executed")
             issues = audit_package_security(root)
             self.assertTrue(any("Unexpected package file" in issue for issue in issues))
+
+    def test_generated_metadata_validates_crafting_and_package_manifest(self):
+        self.assertEqual(validate_crafting_metadata({"recipe_guid": "recipe", "ingredients": [{"guid": "wood", "count": 5}]}), [])
+        self.assertEqual(validate_package_manifest({"manifest_version": 1, "package_name": "chair", "files": [{"path": "mod.json"}]}), [])
+        self.assertTrue(validate_crafting_metadata({"recipe_guid": "recipe", "ingredients": [{"guid": "wood", "count": 0}]}))
+        self.assertTrue(validate_package_manifest({"manifest_version": 1, "package_name": "chair", "files": [{"path": "../unsafe"}]}))
 
     def test_registration_simulator_is_static_only(self):
         result = simulate_registration("game.assets.create_resource(source_item.data, 'keen::ItemInfo'); item_registry.data.itemRefs")

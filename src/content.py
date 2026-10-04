@@ -92,6 +92,42 @@ def validate_generated_metadata(metadata: dict) -> list[str]:
     return issues
 
 
+def validate_crafting_metadata(metadata: dict) -> list[str]:
+    """Validate recipe metadata without resolving or executing game resources."""
+    if not isinstance(metadata, dict):
+        return ["crafting metadata must be an object"]
+    issues = []
+    if not str(metadata.get("recipe_guid", "")).strip():
+        issues.append("crafting metadata is missing recipe_guid")
+    ingredients = metadata.get("ingredients", [])
+    if ingredients and not isinstance(ingredients, list):
+        issues.append("crafting ingredients must be a list")
+    for ingredient in ingredients if isinstance(ingredients, list) else []:
+        if not isinstance(ingredient, dict) or not str(ingredient.get("guid", "")).strip():
+            issues.append("each crafting ingredient needs a guid")
+        elif not isinstance(ingredient.get("count", 0), int) or ingredient.get("count", 0) <= 0:
+            issues.append("each crafting ingredient count must be positive")
+    return issues
+
+
+def validate_package_manifest(metadata: dict) -> list[str]:
+    """Validate package identity and file inventory metadata offline."""
+    if not isinstance(metadata, dict):
+        return ["package manifest must be an object"]
+    required = {"manifest_version", "package_name", "files"}
+    issues = [f"package manifest is missing {key}" for key in sorted(required - metadata.keys())]
+    if "manifest_version" in metadata and metadata["manifest_version"] != 1:
+        issues.append("unsupported package manifest version")
+    if "files" in metadata and not isinstance(metadata["files"], list):
+        issues.append("package manifest files must be a list")
+    for file_entry in metadata.get("files", []) if isinstance(metadata.get("files", []), list) else []:
+        if not isinstance(file_entry, dict) or not str(file_entry.get("path", "")).strip():
+            issues.append("each package manifest file needs a path")
+        elif Path(file_entry["path"]).is_absolute() or ".." in Path(file_entry["path"]).parts:
+            issues.append("package manifest paths must be relative")
+    return issues
+
+
 def import_generated_package(package_root: Path) -> dict:
     """Import generated JSON evidence without executing package code."""
     root = Path(package_root)
@@ -108,6 +144,10 @@ def import_generated_package(package_root: Path) -> dict:
     if "validation.json" not in imported:
         raise ValueError("Generated package is missing validation.json.")
     issues = validate_generated_metadata(imported["validation.json"])
+    if "crafting.json" in imported:
+        issues.extend(validate_crafting_metadata(imported["crafting.json"]))
+    if "mod.json" in imported and "package_manifest" in imported["mod.json"]:
+        issues.extend(validate_package_manifest(imported["mod.json"]["package_manifest"]))
     if issues:
         raise ValueError("Generated metadata invalid: " + " ".join(issues))
     return {"files": imported, "executed": False, "installed": False}

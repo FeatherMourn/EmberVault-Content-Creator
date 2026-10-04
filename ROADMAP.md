@@ -135,7 +135,7 @@ promotion of research into working game content.
      target identity, base references, registries, recipes, and file inventory.
 55. [x] Import generated package metadata back into the project and preserve
      provenance, hashes, and source-tool versions.
-56. [ ] Validate `crafting.json`, `validation.json`, icon metadata, and package
+56. [x] Validate `crafting.json`, `validation.json`, icon metadata, and package
      manifests against shared schemas.
 57. [x] Add icon and package previews to the project review UI; recipe-preview
      detail remains part of schema validation work.
@@ -165,7 +165,7 @@ promotion of research into working game content.
       multiplayer states are distinct.
 - [x] Incomplete or contradictory evidence is surfaced.
 - [x] Export packages identify and target the shared schema.
-- [ ] Export packages are schema-validated and sanitized in the application.
+- [x] Export packages are schema-validated and sanitized in the application.
 - [ ] External Blender Tools handoffs retain provenance and are independently
       validated before being included in an export package.
 - [ ] Projects persist safely across saves, loads, and version changes.
