@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from embervault_sdk import ModuleContext
+from embervault_sdk import ModuleContext, validate_manifest
 from src.module import validate_design
 from src.content import (BlueprintLibrary, FurnitureProject, bed_template, create_furniture_project,
                          compare_package_metadata, import_package_metadata,
@@ -16,6 +16,11 @@ from src.content import (BlueprintLibrary, FurnitureProject, bed_template, creat
 
 
 class ContentCreatorTests(unittest.TestCase):
+    def test_manifest_matches_shared_sdk_contract(self):
+        manifest = json.loads((Path(__file__).parents[1] / "module.json").read_text(encoding="utf-8"))
+        self.assertEqual(validate_manifest(manifest), [])
+        self.assertTrue(manifest["safety"]["read_only"])
+
     def test_medieval_armchair_reference_fixture_is_offline_only(self):
         fixture = json.loads((Path(__file__).parent / "fixtures" / "medieval_armchair.reference.json").read_text(encoding="utf-8"))
         self.assertEqual(fixture["target"]["model_name"], "global_props_roughwood_chair_01_a")
