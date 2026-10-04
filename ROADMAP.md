@@ -86,10 +86,36 @@ promotion of research into working game content.
 33. [ ] Build a corpus of valid, invalid, incomplete, and contradictory project
     fixtures.
 
+### Usability, traceability, and release hardening — planned
+
+34. [ ] Add a project dashboard with recent projects, fixture templates,
+     workflow status, and recovery state.
+35. [ ] Add a guided workflow wizard from project setup through donor selection,
+     evidence review, handoff, validation, and export.
+36. [ ] Add inline field validation with actionable guidance before preview or
+     export.
+37. [ ] Expand evidence records with notes, timestamps, source types, and
+     confidence levels.
+38. [ ] Add automatic project snapshots, recovery history, undo, and redo.
+39. [ ] Add a compatibility panel for game builds, Blender versions, and
+     external-tool versions.
+40. [ ] Add complete export manifests with hashes, file inventories, and
+     replacement-versus-new-item comparisons.
+41. [ ] Add fixture templates for chairs, tables, storage, and decorative items.
+42. [ ] Add a searchable donor and recipe library backed by Mod Research.
+43. [ ] Add a pre-export review checklist showing verified, unknown, and blocked
+     requirements.
+44. [ ] Add safe import of metadata from previously generated EML-related
+     packages without modifying original files.
+45. [ ] Add structured, user-visible activity logs for project changes,
+     validation, handoff, export, and recovery.
+46. [ ] Add a capability matrix that separates offline-supported,
+     external-tool-dependent, and runtime-unverified features.
+
 ### Later promotion work
 
-34. [ ] Publish only sanitized, review-approved exports to EmberVault Web.
-35. [ ] Add runtime adapters only when current-build evidence proves behavior,
+47. [ ] Publish only sanitized, review-approved exports to EmberVault Web.
+48. [ ] Add runtime adapters only when current-build evidence proves behavior,
     persistence, multiplayer impact, and rollback.
 
 ## Definition of done
@@ -107,6 +133,8 @@ promotion of research into working game content.
 - [ ] Runtime claims remain separate from static Blender/package evidence.
 - [ ] External-tool adapters, fixtures, capability matrix, hashes, migrations,
       history, previews, offline mode, logs, review checks, compatibility
-      warnings, and the test corpus are implemented.
+      warnings, test corpus, dashboard, guided wizard, evidence enrichment,
+      snapshots, comparison views, fixture library, searchable donor library,
+      safe metadata import, and capability matrix are implemented.
 - [ ] Tests, documentation, and package verification pass.
 - [ ] Changes are committed and pushed.
