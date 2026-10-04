@@ -12,6 +12,25 @@ PROJECT_SCHEMA_VERSION = 1
 SUPPORTED_FURNITURE_CATEGORIES = {"bed", "chair", "table", "storage", "decor"}
 
 
+def validate_export_contract(payload: dict) -> list[str]:
+    issues = []
+    required = {"schema_version", "schema_id", "application_state", "content_type", "project", "runtime_plan", "evidence_summary", "evidence", "live_game_files_touched"}
+    issues.extend(f"missing:{key}" for key in sorted(required - payload.keys()))
+    if payload.get("schema_version") != 1:
+        issues.append("schema_version")
+    if payload.get("schema_id") != "https://embervault.dev/contracts/content-project-export.schema.json":
+        issues.append("schema_id")
+    if payload.get("application_state") != "design-only":
+        issues.append("application_state")
+    if payload.get("live_game_files_touched") is not False:
+        issues.append("live_game_files_touched")
+    evidence_summary = payload.get("evidence_summary", {})
+    for key in ("verification", "evidence_count", "open_questions"):
+        if key not in evidence_summary:
+            issues.append(f"evidence_summary.{key}")
+    return issues
+
+
 @dataclass
 class FurnitureProject:
     project_id: str = field(default_factory=lambda: f"cc-{uuid4().hex}")
@@ -232,6 +251,9 @@ class FurnitureProject:
         issues = self.validate()
         if issues:
             raise ValueError(" ".join(issues))
+        issues = validate_export_contract(self.manifest())
+        if issues:
+            raise ValueError("Export contract invalid: " + " ".join(issues))
         destination = Path(destination)
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text(json.dumps(self.manifest(), indent=2), encoding="utf-8")

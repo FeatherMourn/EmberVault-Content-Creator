@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 
 from embervault_sdk import ModuleContext
 from src.module import validate_design
-from src.content import bed_template, create_furniture_project
+from src.content import bed_template, create_furniture_project, validate_export_contract
 
 
 class ContentCreatorTests(unittest.TestCase):
@@ -116,6 +116,11 @@ class ContentCreatorTests(unittest.TestCase):
         review = bed_template().export_review()
         self.assertFalse(review["ready"])
         self.assertIn("Unverified or partial verification areas remain open.", review["issues"])
+
+    def test_export_contract_validation_rejects_live_mutation(self):
+        payload = bed_template().manifest()
+        payload["live_game_files_touched"] = True
+        self.assertIn("live_game_files_touched", validate_export_contract(payload))
 
 
 if __name__ == "__main__":
