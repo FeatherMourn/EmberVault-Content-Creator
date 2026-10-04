@@ -19,6 +19,9 @@ promotion of research into working game content.
 - EmberVault-Module-SDK: module boundary.
 - Control Center: profiles, operations, evidence, and recovery context.
 - Mod Research: donor and verification evidence.
+- EnshroudedBlenderTools research and generated-package evidence. Content
+  Creator will orchestrate and validate this external pipeline rather than
+  reimplement Blender or the game resource encoder.
 
 ## Milestones
 
@@ -36,19 +39,22 @@ promotion of research into working game content.
 6. [ ] Build structured authoring for furniture, buildings, recipes, and assets.
 7. [ ] Add donor, recipe, resource, and asset-reference selection with path
    safety validation.
-8. [ ] Add evidence records, verification-state editing, and open-question
+8. [ ] Add an external-tool handoff for EnshroudedBlenderTools, recording the
+   repository/version, Blender version, game build, source GUIDs, generated
+   package paths, and tool validation results.
+9. [ ] Add evidence records, verification-state editing, and open-question
    tracking.
-9. [ ] Add deterministic previews and a clear separation between design data,
+10. [ ] Add deterministic previews and a clear separation between design data,
    runtime plans, and unsupported claims.
-10. [ ] Validate project exports against the shared Content Project Export
+11. [ ] Validate project exports against the shared Content Project Export
     contract and sanitize public-facing fields.
-11. [ ] Add save/load persistence with corruption and incompatible-version
+12. [ ] Add save/load persistence with corruption and incompatible-version
     handling.
-12. [ ] Connect the standalone project model to the Control Center module
+13. [ ] Connect the standalone project model to the Control Center module
     lifecycle without allowing live-game mutation.
-13. [ ] Build the first complete bed workflow from authoring through export,
+14. [ ] Build the first complete bed workflow from authoring through export,
     including registration evidence and unresolved visual/runtime questions.
-14. [ ] Add end-to-end tests, clean-install packaging checks, documentation,
+15. [ ] Add end-to-end tests, clean-install packaging checks, documentation,
     and GitHub backup.
 
 ### Later promotion work
@@ -65,7 +71,10 @@ promotion of research into working game content.
 - [x] Incomplete or contradictory evidence is surfaced.
 - [x] Export packages identify and target the shared schema.
 - [ ] Export packages are schema-validated and sanitized in the application.
+- [ ] External Blender Tools handoffs retain provenance and are independently
+      validated before being included in an export package.
 - [ ] Projects persist safely across saves, loads, and version changes.
 - [ ] Control Center lifecycle integration is verified.
+- [ ] Runtime claims remain separate from static Blender/package evidence.
 - [ ] Tests, documentation, and package verification pass.
 - [ ] Changes are committed and pushed.
