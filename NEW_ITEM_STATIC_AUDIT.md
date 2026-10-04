@@ -44,6 +44,17 @@ runtime behavior is claimed.
 - The package is staged in an isolated workspace only. It has not been run in
   the game.
 
+## Refinement result
+
+- The package metadata now describes new-item and recipe capabilities instead
+  of using replacement wording.
+- An explicit carpenter chair recipe template is recorded.
+- An explicit wood-log ingredient and count are recorded in `crafting.json`.
+- The refined package contains five files, including the crafting record.
+- The item icon remains unset in the validation metadata and still requires
+  either a supplied custom icon or runtime confirmation of the base-icon
+  fallback.
+
 ## Conclusion
 
 The package is ready for a later isolated runtime test. Static evidence supports
