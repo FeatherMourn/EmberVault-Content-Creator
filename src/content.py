@@ -55,6 +55,24 @@ def authoring_evidence_summary(record: dict, subject: str = "donor") -> dict:
     }
 
 
+def compare_authoring_records(left: dict, right: dict) -> dict:
+    """Compare offline donor or recipe records without inferring runtime behavior."""
+    left_summary = authoring_evidence_summary(left)
+    right_summary = authoring_evidence_summary(right)
+    fields = ("name", "category", "item_id", "recipe_id", "source")
+    differences = {
+        field: {"left": left.get(field), "right": right.get(field)}
+        for field in fields if left.get(field) != right.get(field)
+    }
+    return {
+        "differences": differences,
+        "same_category": left.get("category") == right.get("category"),
+        "evidence": {"left": left_summary, "right": right_summary},
+        "runtime_behavior": "unverified",
+        "application_state": "design-only",
+    }
+
+
 def import_package_metadata(package_root: Path) -> dict:
     """Read safe JSON metadata from an existing package without executing it."""
     root = Path(package_root)

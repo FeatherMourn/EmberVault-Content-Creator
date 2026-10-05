@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 
 from embervault_sdk import ModuleContext, validate_manifest
 from src.module import validate_design
-from src.content import (BlueprintLibrary, FurnitureProject, authoring_donor_options, authoring_evidence_summary, authoring_recipe_options, bed_template, create_furniture_project,
+from src.content import (BlueprintLibrary, FurnitureProject, authoring_donor_options, authoring_evidence_summary, authoring_recipe_options, bed_template, compare_authoring_records, create_furniture_project,
                          compare_package_metadata, import_package_metadata,
                          audit_package_security, import_generated_package,
                          prepare_bed_vertical_slice,
@@ -157,6 +157,14 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertEqual(summary["source"], "tested bed workflow")
         self.assertEqual(summary["runtime_behavior"], "unverified")
         self.assertEqual(len(summary["limitations"]), 2)
+
+    def test_authoring_record_comparison_is_offline_and_deterministic(self):
+        records = authoring_donor_options()
+        comparison = compare_authoring_records(records[0], records[1])
+        self.assertIn("category", comparison["differences"])
+        self.assertFalse(comparison["same_category"])
+        self.assertEqual(comparison["runtime_behavior"], "unverified")
+        self.assertEqual(comparison["application_state"], "design-only")
 
     def test_contradictory_project_evidence_remains_review_blocked(self):
         project = create_furniture_project("Evidence Review")
