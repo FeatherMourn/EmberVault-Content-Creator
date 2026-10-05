@@ -12,7 +12,7 @@ from src.content import (BlueprintLibrary, FurnitureProject, authoring_donor_opt
                          reproducibility_report, validate_export_contract,
                          simulate_registration, validate_guid_collisions,
                          package_preview, capability_matrix,
-                         validate_crafting_metadata, validate_package_manifest)
+                         validate_crafting_metadata, validate_package_manifest, package_compatibility_report)
 
 
 class ContentCreatorTests(unittest.TestCase):
@@ -379,6 +379,15 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertTrue(validate_package_manifest(invalid))
         self.assertTrue(validate_package_manifest(incomplete))
         self.assertEqual(contradictory["evidence_state"], "contradicted")
+
+    def test_package_compatibility_report_is_bounded_and_stateful(self):
+        metadata = {"manifest_version": 1, "package_name": "chair", "files": [{"path": "mod.json"}],
+                    "evidence_state": "verified", "tool_versions": {"blender": "5"}}
+        report = package_compatibility_report(metadata, {"blender": "5"})
+        self.assertEqual(report["state"], "verified")
+        self.assertTrue(report["read_only"])
+        blocked = package_compatibility_report({**metadata, "evidence_state": "contradicted"})
+        self.assertEqual(blocked["state"], "blocked")
 
     def test_registration_simulator_is_static_only(self):
         result = simulate_registration("game.assets.create_resource(source_item.data, 'keen::ItemInfo'); item_registry.data.itemRefs")

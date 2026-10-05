@@ -180,6 +180,25 @@ def validate_package_manifest(metadata: dict) -> list[str]:
     return issues
 
 
+def package_compatibility_report(metadata: dict, expected_versions: dict | None = None) -> dict:
+    """Combine offline package validation and version comparisons safely."""
+    issues = validate_package_manifest(metadata)
+    expected_versions = expected_versions or {}
+    recorded_versions = metadata.get("tool_versions", {}) if isinstance(metadata, dict) else {}
+    for key, expected in expected_versions.items():
+        if expected and recorded_versions.get(key) and recorded_versions[key] != expected:
+            issues.append(f"{key} differs from the recorded package version.")
+    evidence_state = metadata.get("evidence_state", "unknown") if isinstance(metadata, dict) else "unknown"
+    if issues or evidence_state in {"blocked", "contradicted"}:
+        state = "blocked"
+    elif evidence_state in {"partial", "unknown"} or not recorded_versions:
+        state = "partial"
+    else:
+        state = "verified"
+    return {"state": state, "issues": issues, "recorded_versions": dict(recorded_versions),
+            "read_only": True, "runtime_testing": "not_started"}
+
+
 def import_generated_package(package_root: Path) -> dict:
     """Import generated JSON evidence without executing package code."""
     root = Path(package_root)
