@@ -42,6 +42,19 @@ def authoring_recipe_options(query: str = "", category: str = "") -> list[dict]:
             for option in authoring_donor_options(query, category) if option["recipe_id"] is not None]
 
 
+def authoring_evidence_summary(record: dict, subject: str = "donor") -> dict:
+    """Summarize provenance for UI review without adding runtime conclusions."""
+    if not isinstance(record, dict) or not record.get("source"):
+        raise ValueError("An authoring record with a source is required.")
+    return {
+        "subject": subject,
+        "source": record["source"],
+        "evidence_state": record.get("recipe_evidence", record.get("evidence_state", "unknown")),
+        "runtime_behavior": record.get("recipe_behavior", record.get("runtime_behavior", "unverified")),
+        "limitations": ["Offline research only.", "Runtime behavior has not been verified."],
+    }
+
+
 def import_package_metadata(package_root: Path) -> dict:
     """Read safe JSON metadata from an existing package without executing it."""
     root = Path(package_root)

@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QWidget,
 )
 
-from .content import BlueprintLibrary, FurnitureProject, authoring_donor_options, authoring_recipe_options, bed_template, import_package_metadata, package_preview
+from .content import BlueprintLibrary, FurnitureProject, authoring_donor_options, authoring_evidence_summary, authoring_recipe_options, bed_template, import_package_metadata, package_preview
 
 
 class ContentCreatorWindow(QMainWindow):
@@ -239,7 +239,8 @@ class ContentCreatorWindow(QMainWindow):
                 self.donor_item.setText(str(record["item_id"]))
             if record["recipe_id"] is not None:
                 self.donor_recipe.setText(str(record["recipe_id"]))
-            self.status.setText(f"Selected offline donor: {record['name']}. Runtime behavior remains unverified.")
+            evidence = authoring_evidence_summary(record)
+            self.status.setText(f"Selected {evidence['subject']} from {evidence['source']}; offline evidence, runtime unverified.")
             return
 
     def _select_recipe(self, item) -> None:
@@ -247,7 +248,8 @@ class ContentCreatorWindow(QMainWindow):
         for record in authoring_recipe_options("", self.donor_category.currentText() if self.donor_category.currentText() != "all" else ""):
             if record["name"] in selected:
                 self.donor_recipe.setText(str(record["recipe_id"]))
-                self.status.setText(f"Selected offline recipe evidence: {record['name']}. Runtime behavior remains unverified.")
+                evidence = authoring_evidence_summary(record, "recipe")
+                self.status.setText(f"Selected {evidence['subject']} from {evidence['source']}; offline evidence, runtime unverified.")
                 return
 
     def _search_blueprints(self, query: str) -> None:
