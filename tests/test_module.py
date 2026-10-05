@@ -402,6 +402,15 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertEqual(record["authorship_state"], "creator-declared")
         self.assertIn("license", record)
 
+    def test_public_record_preserves_review_required_without_private_evidence(self):
+        project = create_furniture_project("Reviewed Boundary")
+        project.add_evidence("Contradictory probe", "C:/private/research/probe.json", state="contradicted")
+        record = BlueprintLibrary(Path(".")).public_record(project)
+        self.assertEqual(record["evidence_state"], "review-required")
+        self.assertTrue(record["review_issues"])
+        self.assertNotIn("private", json.dumps(record).lower())
+        self.assertNotIn("contradictory probe", json.dumps(record).lower())
+
     def test_blueprint_library_filters_by_evidence_state(self):
         with TemporaryDirectory() as folder:
             library = BlueprintLibrary(Path(folder))
