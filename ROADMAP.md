@@ -53,7 +53,7 @@ validation, recovery snapshots, save/load, and design-only export paths.
    safety validation.
 9. [x] Add the initial read-only donor search and resource metadata client from
    Mod Research; UI integration remains active.
-10. [ ] Add an external-tool handoff panel for EnshroudedBlenderTools, recording the
+10. [x] Add an external-tool handoff panel for EnshroudedBlenderTools, recording the
    repository/version, Blender version, game build, source GUIDs, generated
    package paths, and tool validation results.
 11. [ ] Add visible verification states for verified, partial, unknown, and
@@ -91,7 +91,7 @@ validation, recovery snapshots, save/load, and design-only export paths.
     unavailable.
 30. [ ] Add structured logs for validation, handoff, export, and recovery.
 31. [ ] Add a review checklist before a package can be marked ready.
-32. [ ] Add compatibility warnings for Blender, game-build, and tool-version
+32. [x] Add compatibility warnings for Blender, game-build, and tool-version
     mismatches.
 33. [ ] Build a corpus of valid, invalid, incomplete, and contradictory project
     fixtures.

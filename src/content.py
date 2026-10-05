@@ -618,6 +618,27 @@ class FurnitureProject:
             "runtime_testing": "not_started",
         }
 
+    def blender_compatibility_report(self, tool_version: str = "", blender_version: str = "",
+                                     game_build: str = "") -> dict:
+        """Compare supplied versions with the offline handoff record only."""
+        handoff = self.blender_handoff
+        if not handoff:
+            return {"state": "unknown", "mismatches": ["No Blender handoff is recorded."],
+                    "read_only": True, "runtime_testing": "not_started"}
+        mismatches = []
+        for key, supplied, label in (("tool_version", tool_version, "external tool version"),
+                                     ("blender_version", blender_version, "Blender version"),
+                                     ("game_build", game_build, "game build")):
+            if supplied.strip() and supplied.strip() != handoff.get(key):
+                mismatches.append(f"{label} differs from the recorded handoff.")
+        state = "blocked" if handoff.get("validation_state") == "incomplete" else ("partial" if mismatches else "verified")
+        return {"state": state, "mismatches": mismatches, "recorded": {
+            "repository": handoff.get("repository", "unknown"),
+            "tool_version": handoff.get("tool_version", "unknown"),
+            "blender_version": handoff.get("blender_version", "unknown"),
+            "game_build": handoff.get("game_build", "unknown"),
+        }, "read_only": True, "runtime_testing": "not_started"}
+
     def add_resource_metadata(self, resource_type: str, resource_id: str, source: str) -> None:
         record = {"resource_type": resource_type.strip(), "resource_id": resource_id.strip(), "source": source.strip()}
         if not all(record.values()):

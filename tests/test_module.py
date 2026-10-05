@@ -185,6 +185,19 @@ class ContentCreatorTests(unittest.TestCase):
             self.assertTrue(report["ready_for_round_trip"])
             self.assertEqual(report["runtime_testing"], "not_started")
 
+    def test_blender_compatibility_report_separates_verified_and_partial(self):
+        project = create_furniture_project("Compatibility report")
+        project.set_blender_handoff("repo", "tool-1", "blender-5", "build-1", ["guid"], ["mod.json"])
+        verified = project.blender_compatibility_report("tool-1", "blender-5", "build-1")
+        partial = project.blender_compatibility_report("tool-2", "blender-5", "build-1")
+        self.assertEqual(verified["state"], "verified")
+        self.assertEqual(partial["state"], "partial")
+        self.assertTrue(partial["read_only"])
+
+    def test_blender_compatibility_report_is_unknown_without_handoff(self):
+        report = create_furniture_project("No handoff").blender_compatibility_report()
+        self.assertEqual(report["state"], "unknown")
+
     def test_preview_is_deterministic_and_design_only(self):
         project = bed_template()
         first, second = project.preview(), project.preview()
