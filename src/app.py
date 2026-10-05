@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QWidget,
 )
 
-from .content import BlueprintLibrary, FurnitureProject, bed_template, import_package_metadata, package_preview, search_donor_library
+from .content import BlueprintLibrary, FurnitureProject, authoring_donor_options, bed_template, import_package_metadata, package_preview
 
 
 class ContentCreatorWindow(QMainWindow):
@@ -46,9 +46,13 @@ class ContentCreatorWindow(QMainWindow):
         self.donor_search = QLineEdit()
         self.donor_search.setPlaceholderText("Search donors, recipes, categories, or sources")
         self.donor_search.textChanged.connect(self._search_donors)
+        self.donor_category = QComboBox()
+        self.donor_category.addItems(["all", "bed", "chair", "table", "storage", "decor"])
+        self.donor_category.currentTextChanged.connect(lambda _value: self._search_donors(self.donor_search.text()))
         self.donor_results = QListWidget()
         self.donor_results.itemClicked.connect(self._select_donor)
         library_layout.addWidget(self.donor_search)
+        library_layout.addWidget(self.donor_category)
         library_layout.addWidget(self.donor_results)
         layout.addWidget(library)
 
@@ -208,16 +212,22 @@ class ContentCreatorWindow(QMainWindow):
 
     def _search_donors(self, query: str) -> None:
         self.donor_results.clear()
-        for record in search_donor_library(query):
+        category = self.donor_category.currentText()
+        category = "" if category == "all" else category
+        for record in authoring_donor_options(query, category):
             item_id = record["item_id"] if record["item_id"] is not None else "not registered"
             recipe_id = record["recipe_id"] if record["recipe_id"] is not None else "not registered"
-            self.donor_results.addItem(f"{record['name']} · {record['category']} · item {item_id} · recipe {recipe_id} · offline evidence")
+            selectable = "selectable" if record["selectable"] else "review required"
+            self.donor_results.addItem(f"{record['name']} · {record['category']} · item {item_id} · recipe {recipe_id} · {selectable} · offline evidence")
 
     def _select_donor(self, item) -> None:
         selected = item.text()
-        for record in search_donor_library(""):
+        for record in authoring_donor_options("", self.donor_category.currentText() if self.donor_category.currentText() != "all" else ""):
             if record["name"] not in selected:
                 continue
+            if not record["selectable"]:
+                self.status.setText(f"Reviewed donor: {record['name']}. IDs are incomplete; selection is not available.")
+                return
             if record["item_id"] is not None:
                 self.donor_item.setText(str(record["item_id"]))
             if record["recipe_id"] is not None:
