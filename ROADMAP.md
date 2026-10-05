@@ -114,7 +114,7 @@ validation, recovery snapshots, save/load, and design-only export paths.
      replacement-versus-new-item comparisons.
 41. [x] Add fixture templates for chairs and tables; storage and decorative
      fixtures remain future coverage.
-42. [ ] Add a searchable donor and recipe library backed by Mod Research.
+42. [x] Add a searchable donor and recipe library backed by Mod Research.
 43. [x] Add a pre-export review checklist showing verified, unknown, and blocked
      requirements.
 44. [ ] Add safe import of metadata from previously generated EML-related

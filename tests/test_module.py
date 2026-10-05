@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 
 from embervault_sdk import ModuleContext, validate_manifest
 from src.module import validate_design
-from src.content import (BlueprintLibrary, FurnitureProject, bed_template, create_furniture_project,
+from src.content import (BlueprintLibrary, FurnitureProject, authoring_donor_options, bed_template, create_furniture_project,
                          compare_package_metadata, import_package_metadata,
                          audit_package_security, import_generated_package,
                          prepare_bed_vertical_slice,
@@ -134,6 +134,13 @@ class ContentCreatorTests(unittest.TestCase):
         project.add_resource_metadata("RenderModel", "model-guid", "KFC3 export")
         self.assertEqual(project.donor_item_id, 123)
         self.assertEqual(project.donor_recipe_id, 456)
+
+    def test_authoring_donor_options_are_evidence_bounded(self):
+        options = authoring_donor_options(category="bed")
+        self.assertEqual(len(options), 1)
+        self.assertTrue(options[0]["selectable"])
+        self.assertEqual(options[0]["evidence_state"], "offline-observed")
+        self.assertEqual(options[0]["runtime_behavior"], "unverified")
         self.assertEqual(project.evidence[0]["resource_type"], "RenderModel")
 
     def test_donor_ids_must_be_positive_integers(self):

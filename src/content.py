@@ -23,6 +23,18 @@ def search_donor_library(query: str = "") -> list[dict]:
     return [record for record in OFFLINE_DONOR_LIBRARY if not query or query in " ".join(str(value).lower() for value in record.values())]
 
 
+def authoring_donor_options(query: str = "", category: str = "") -> list[dict]:
+    """Return safe authoring options from the offline donor/recipe library."""
+    category = category.strip().lower()
+    options = []
+    for record in search_donor_library(query):
+        if category and record["category"].lower() != category:
+            continue
+        options.append({**record, "evidence_state": "offline-observed",
+                        "runtime_behavior": "unverified", "selectable": record["item_id"] is not None and record["recipe_id"] is not None})
+    return options
+
+
 def import_package_metadata(package_root: Path) -> dict:
     """Read safe JSON metadata from an existing package without executing it."""
     root = Path(package_root)
