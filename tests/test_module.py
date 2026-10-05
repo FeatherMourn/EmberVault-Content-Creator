@@ -149,6 +149,8 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertTrue(options[0]["recipe_selectable"])
         self.assertEqual(options[0]["recipe_evidence"], "offline-observed")
         self.assertEqual(options[0]["recipe_behavior"], "unverified")
+        self.assertEqual(options[0]["recipe_identity"]["recipe_id"], 3531872774)
+        self.assertEqual(options[0]["recipe_metadata_state"], "complete")
 
     def test_authoring_evidence_summary_preserves_provenance_and_limits(self):
         record = authoring_recipe_options(category="bed")[0]
