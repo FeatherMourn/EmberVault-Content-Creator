@@ -135,6 +135,10 @@ class ContentCreatorWindow(QMainWindow):
         self.checklist.setMaximumHeight(130)
         layout.addWidget(QLabel("Pre-export review checklist"))
         layout.addWidget(self.checklist)
+        self.evidence_review = QListWidget()
+        self.evidence_review.setMaximumHeight(130)
+        layout.addWidget(QLabel("Attached evidence and review warnings"))
+        layout.addWidget(self.evidence_review)
         self.capabilities = QLabel("Capabilities: choose a workflow to inspect support.")
         layout.addWidget(self.capabilities)
         self.verification = QLabel("Verification: no project loaded.")
@@ -323,9 +327,21 @@ class ContentCreatorWindow(QMainWindow):
             self.inline_validation.setText("Validation: current project fields are valid.")
             self.inline_validation.setStyleSheet("color: #6c6;")
 
+    def _refresh_evidence_review(self) -> None:
+        self.evidence_review.clear()
+        for evidence in self.project.evidence:
+            self.evidence_review.addItem(
+                f"{evidence.get('state', 'unknown').upper()}: {evidence.get('title', 'Untitled')} · source {evidence.get('source', 'unknown')}"
+            )
+        for issue in self.project.review_issues():
+            self.evidence_review.addItem(f"WARNING: {issue}")
+        if not self.project.evidence:
+            self.evidence_review.addItem("REVIEW REQUIRED: No evidence attached.")
+
     def preview(self) -> None:
         self.project = self._read_project(); issues = self.project.validate(); self.preview_list.clear()
         self._update_project_summary()
+        self._refresh_evidence_review()
         self.checklist.clear()
         for item in self.project.export_checklist():
             self.checklist.addItem(f"{item['state'].upper()}: {item['check']} — {item['details']}")

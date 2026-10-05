@@ -158,6 +158,13 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertEqual(summary["runtime_behavior"], "unverified")
         self.assertEqual(len(summary["limitations"]), 2)
 
+    def test_contradictory_project_evidence_remains_review_blocked(self):
+        project = create_furniture_project("Evidence Review")
+        project.add_evidence("Probe A", "offline-a", state="observed")
+        project.add_evidence("Probe B", "offline-b", state="contradicted")
+        self.assertIn("Contradictory evidence requires review.", project.review_issues())
+        self.assertFalse(project.export_review()["ready"])
+
     def test_donor_ids_must_be_positive_integers(self):
         project = create_furniture_project("Chair", "chair")
         with self.assertRaisesRegex(ValueError, "donor item"):
