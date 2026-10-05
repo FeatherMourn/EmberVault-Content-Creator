@@ -165,6 +165,13 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertIn("Contradictory evidence requires review.", project.review_issues())
         self.assertFalse(project.export_review()["ready"])
 
+    def test_review_state_counts_are_deterministic(self):
+        project = create_furniture_project("Evidence States")
+        project.add_evidence("Observed", "offline-a", state="observed")
+        project.add_evidence("Partial", "offline-b", state="partial")
+        self.assertEqual([item["state"] for item in project.evidence], ["observed", "partial"])
+        self.assertIn("Unverified or partial verification areas remain open.", project.review_issues())
+
     def test_donor_ids_must_be_positive_integers(self):
         project = create_furniture_project("Chair", "chair")
         with self.assertRaisesRegex(ValueError, "donor item"):

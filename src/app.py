@@ -137,7 +137,13 @@ class ContentCreatorWindow(QMainWindow):
         layout.addWidget(self.checklist)
         self.evidence_review = QListWidget()
         self.evidence_review.setMaximumHeight(130)
+        self.evidence_filter = QComboBox()
+        self.evidence_filter.addItems(["all", "observed", "partial", "contradicted", "blocked"])
+        self.evidence_filter.currentTextChanged.connect(lambda _value: self._refresh_evidence_review())
+        self.evidence_summary = QLabel("Evidence review: no evidence attached.")
         layout.addWidget(QLabel("Attached evidence and review warnings"))
+        layout.addWidget(self.evidence_filter)
+        layout.addWidget(self.evidence_summary)
         layout.addWidget(self.evidence_review)
         self.capabilities = QLabel("Capabilities: choose a workflow to inspect support.")
         layout.addWidget(self.capabilities)
@@ -329,11 +335,22 @@ class ContentCreatorWindow(QMainWindow):
 
     def _refresh_evidence_review(self) -> None:
         self.evidence_review.clear()
+        states = [evidence.get("state", "unknown") for evidence in self.project.evidence]
+        issues = self.project.review_issues()
+        if not self.project.evidence:
+            self.evidence_summary.setText("Evidence review: no evidence attached; review required.")
+        elif issues:
+            self.evidence_summary.setText(f"Evidence review: {len(self.project.evidence)} attached; {len(issues)} warning(s); export blocked.")
+        else:
+            self.evidence_summary.setText(f"Evidence review: {len(self.project.evidence)} attached; no current warnings.")
+        selected_state = self.evidence_filter.currentText()
         for evidence in self.project.evidence:
+            if selected_state != "all" and evidence.get("state") != selected_state:
+                continue
             self.evidence_review.addItem(
                 f"{evidence.get('state', 'unknown').upper()}: {evidence.get('title', 'Untitled')} · source {evidence.get('source', 'unknown')}"
             )
-        for issue in self.project.review_issues():
+        for issue in issues:
             self.evidence_review.addItem(f"WARNING: {issue}")
         if not self.project.evidence:
             self.evidence_review.addItem("REVIEW REQUIRED: No evidence attached.")
