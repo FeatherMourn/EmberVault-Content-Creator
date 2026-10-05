@@ -261,6 +261,7 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertEqual(panel["state"], "verified")
         self.assertEqual(panel["runtime_testing"], "not_started")
         self.assertTrue(panel["read_only"])
+        self.assertEqual(panel["package_compatibility"], "unknown")
 
     def test_preview_is_deterministic_and_design_only(self):
         project = bed_template()

@@ -714,11 +714,13 @@ class FurnitureProject:
         """Return a deterministic, display-safe compatibility panel payload."""
         handoff = self.blender_handoff
         report = self.blender_compatibility_report()
+        package_state = "verified" if handoff and handoff.get("validation_state") == "validated" and handoff.get("inventory_state") == "complete" else ("blocked" if handoff and handoff.get("validation_state") == "incomplete" else "unknown")
         return {"panel_version": 1, "state": report["state"],
                 "recorded": report.get("recorded", {}),
                 "mismatches": list(report.get("mismatches", [])),
                 "package_validation": handoff.get("validation_state", "unverified") if handoff else "unverified",
                 "package_inventory": handoff.get("inventory_state", "unverified") if handoff else "unverified",
+                "package_compatibility": package_state,
                 "runtime_testing": "not_started", "read_only": True,
                 "mutates_workspace": False}
 
@@ -785,6 +787,7 @@ class FurnitureProject:
     def export_checklist(self) -> list[dict]:
         review = self.export_review()
         compatibility = self.blender_compatibility_report()
+        package_state = self.compatibility_panel()["package_compatibility"]
         evidence_states = sorted({record.get("state", "unknown") for record in self.evidence})
         evidence_detail = f"{len(self.evidence)} evidence record(s) attached; states: {', '.join(evidence_states) or 'none'}."
         if any(record.get("state") == "contradicted" for record in self.evidence):
@@ -793,6 +796,7 @@ class FurnitureProject:
             {"check": "Project fields", "state": "pass" if not self.validate() else "blocked", "details": "Required project data is valid." if not self.validate() else "Project data needs correction."},
             {"check": "Evidence review", "state": "pass" if self.evidence and not any(record.get("state") == "contradicted" for record in self.evidence) else "blocked", "details": evidence_detail},
             {"check": "Compatibility", "state": "warning" if compatibility["state"] in {"unknown", "partial"} else compatibility["state"], "details": "; ".join(compatibility["mismatches"]) or "Recorded offline compatibility is consistent."},
+            {"check": "Package compatibility", "state": "pass" if package_state == "verified" else ("blocked" if package_state == "blocked" else "warning"), "details": f"Offline package state: {package_state}; runtime behavior remains unverified."},
             {"check": "Runtime claims", "state": "blocked", "details": "Runtime behavior is not claimed by a design-only export."},
             {"check": "Design-only boundary", "state": "pass", "details": "Live game files remain untouched."},
             {"check": "Review readiness", "state": "pass" if review["ready"] else "blocked", "details": "Ready for export." if review["ready"] else "Open: " + " ".join(review["issues"])},
@@ -839,7 +843,8 @@ class FurnitureProject:
                               ("repository", "tool_version", "blender_version", "game_build")},
             "provenance": {"source_guids": list(self.blender_handoff.get("source_guids", [])),
                            "validation_state": self.blender_handoff.get("validation_state", "unverified"),
-                           "inventory_state": self.blender_handoff.get("inventory_state", "unverified")},
+                           "inventory_state": self.blender_handoff.get("inventory_state", "unverified"),
+                           "package_compatibility": self.compatibility_panel()["package_compatibility"]},
             "checklist": self.export_checklist(),
         }
         return payload
