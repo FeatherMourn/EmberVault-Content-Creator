@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 
 from embervault_sdk import ModuleContext, validate_manifest
 from src.module import validate_design
-from src.content import (BlueprintLibrary, FurnitureProject, authoring_donor_options, bed_template, create_furniture_project,
+from src.content import (BlueprintLibrary, FurnitureProject, authoring_donor_options, authoring_recipe_options, bed_template, create_furniture_project,
                          compare_package_metadata, import_package_metadata,
                          audit_package_security, import_generated_package,
                          prepare_bed_vertical_slice,
@@ -142,6 +142,13 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertTrue(options[0]["selectable"])
         self.assertEqual(options[0]["evidence_state"], "offline-observed")
         self.assertEqual(options[0]["runtime_behavior"], "unverified")
+
+    def test_authoring_recipe_options_preserve_offline_evidence_boundary(self):
+        options = authoring_recipe_options(category="bed")
+        self.assertEqual(len(options), 1)
+        self.assertTrue(options[0]["recipe_selectable"])
+        self.assertEqual(options[0]["recipe_evidence"], "offline-observed")
+        self.assertEqual(options[0]["recipe_behavior"], "unverified")
 
     def test_donor_ids_must_be_positive_integers(self):
         project = create_furniture_project("Chair", "chair")

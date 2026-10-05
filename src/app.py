@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QWidget,
 )
 
-from .content import BlueprintLibrary, FurnitureProject, authoring_donor_options, bed_template, import_package_metadata, package_preview
+from .content import BlueprintLibrary, FurnitureProject, authoring_donor_options, authoring_recipe_options, bed_template, import_package_metadata, package_preview
 
 
 class ContentCreatorWindow(QMainWindow):
@@ -54,6 +54,10 @@ class ContentCreatorWindow(QMainWindow):
         library_layout.addWidget(self.donor_search)
         library_layout.addWidget(self.donor_category)
         library_layout.addWidget(self.donor_results)
+        self.recipe_results = QListWidget()
+        self.recipe_results.itemClicked.connect(self._select_recipe)
+        library_layout.addWidget(QLabel("Recipe evidence"))
+        library_layout.addWidget(self.recipe_results)
         layout.addWidget(library)
 
         blueprints = QGroupBox("Blueprint library")
@@ -219,6 +223,9 @@ class ContentCreatorWindow(QMainWindow):
             recipe_id = record["recipe_id"] if record["recipe_id"] is not None else "not registered"
             selectable = "selectable" if record["selectable"] else "review required"
             self.donor_results.addItem(f"{record['name']} · {record['category']} · item {item_id} · recipe {recipe_id} · {selectable} · offline evidence")
+        self.recipe_results.clear()
+        for record in authoring_recipe_options(query, category):
+            self.recipe_results.addItem(f"{record['name']} · recipe {record['recipe_id']} · offline evidence · runtime unverified")
 
     def _select_donor(self, item) -> None:
         selected = item.text()
@@ -234,6 +241,14 @@ class ContentCreatorWindow(QMainWindow):
                 self.donor_recipe.setText(str(record["recipe_id"]))
             self.status.setText(f"Selected offline donor: {record['name']}. Runtime behavior remains unverified.")
             return
+
+    def _select_recipe(self, item) -> None:
+        selected = item.text()
+        for record in authoring_recipe_options("", self.donor_category.currentText() if self.donor_category.currentText() != "all" else ""):
+            if record["name"] in selected:
+                self.donor_recipe.setText(str(record["recipe_id"]))
+                self.status.setText(f"Selected offline recipe evidence: {record['name']}. Runtime behavior remains unverified.")
+                return
 
     def _search_blueprints(self, query: str) -> None:
         self.blueprint_results.clear()

@@ -35,6 +35,13 @@ def authoring_donor_options(query: str = "", category: str = "") -> list[dict]:
     return options
 
 
+def authoring_recipe_options(query: str = "", category: str = "") -> list[dict]:
+    """Return recipe choices with explicit offline evidence boundaries."""
+    return [{**option, "recipe_evidence": "offline-observed",
+             "recipe_behavior": "unverified", "recipe_selectable": option["recipe_id"] is not None}
+            for option in authoring_donor_options(query, category) if option["recipe_id"] is not None]
+
+
 def import_package_metadata(package_root: Path) -> dict:
     """Read safe JSON metadata from an existing package without executing it."""
     root = Path(package_root)
