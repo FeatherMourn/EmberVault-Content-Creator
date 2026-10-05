@@ -52,13 +52,13 @@ validation, recovery snapshots, save/load, and design-only export paths.
 8. [x] Add donor, recipe, resource, and asset-reference selection with path
    safety validation.
 9. [x] Add the initial read-only donor search and resource metadata client from
-   Mod Research; UI integration remains active.
+   Mod Research, with authoring UI integration.
 10. [x] Add an external-tool handoff panel for EnshroudedBlenderTools, recording the
    repository/version, Blender version, game build, source GUIDs, generated
    package paths, and tool validation results.
-11. [ ] Add visible verification states for verified, partial, unknown, and
+11. [x] Add visible verification states for verified, partial, unknown, and
     blocked results.
-12. [ ] Add evidence attachment, provenance display, contradiction warnings,
+12. [x] Add evidence attachment, provenance display, contradiction warnings,
     and open-question tracking.
 13. [x] Add deterministic previews and a clear separation between design data,
     runtime plans, and unsupported claims.
@@ -98,11 +98,11 @@ validation, recovery snapshots, save/load, and design-only export paths.
 
 ### Usability, traceability, and release hardening — planned
 
-34. [ ] Add a project dashboard with recent projects, fixture templates,
+34. [x] Add a project dashboard with recent projects, fixture templates,
      workflow status, and recovery state.
-35. [ ] Add a guided workflow wizard from project setup through donor selection,
+35. [x] Add a guided workflow wizard from project setup through donor selection,
      evidence review, handoff, validation, and export.
-36. [ ] Add inline field validation with actionable guidance before preview or
+36. [x] Add inline field validation with actionable guidance before preview or
      export.
 37. [ ] Expand evidence records with notes, timestamps, source types, and
      confidence levels.
