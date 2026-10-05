@@ -134,6 +134,7 @@ class ContentCreatorTests(unittest.TestCase):
         project.add_resource_metadata("RenderModel", "model-guid", "KFC3 export")
         self.assertEqual(project.donor_item_id, 123)
         self.assertEqual(project.donor_recipe_id, 456)
+        self.assertEqual(project.evidence[0]["resource_type"], "RenderModel")
 
     def test_authoring_donor_options_are_evidence_bounded(self):
         options = authoring_donor_options(category="bed")
@@ -141,7 +142,6 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertTrue(options[0]["selectable"])
         self.assertEqual(options[0]["evidence_state"], "offline-observed")
         self.assertEqual(options[0]["runtime_behavior"], "unverified")
-        self.assertEqual(project.evidence[0]["resource_type"], "RenderModel")
 
     def test_donor_ids_must_be_positive_integers(self):
         project = create_furniture_project("Chair", "chair")
