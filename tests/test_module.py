@@ -274,6 +274,19 @@ class ContentCreatorTests(unittest.TestCase):
             self.assertTrue(report["files"]["mod.json"]["sha256"])
             self.assertFalse(report["live_game_files_touched"])
 
+    def test_export_manifest_preserves_package_hashes_versions_and_provenance(self):
+        with TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root / "mod.json").write_text("{}", encoding="utf-8")
+            project = create_furniture_project("Manifest provenance")
+            project.set_blender_handoff("repo", "tool-1", "blender-5", "build-1", ["guid"], ["mod.json"])
+            project.validate_blender_package(["mod.json", "validation.json", "render_data.bin", "src/mod.lua"])
+            project.hash_blender_package(root)
+            metadata = project.manifest()["export_metadata"]
+            self.assertTrue(metadata["package_hashes"]["mod.json"])
+            self.assertEqual(metadata["tool_versions"]["blender_version"], "blender-5")
+            self.assertEqual(metadata["provenance"]["source_guids"], ["guid"])
+
     def test_generated_package_metadata_can_be_reimported_without_execution(self):
         with TemporaryDirectory() as folder:
             root = Path(folder)

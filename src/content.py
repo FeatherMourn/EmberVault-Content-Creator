@@ -754,6 +754,13 @@ class FurnitureProject:
             "project_hash": hashlib.sha256(encoded).hexdigest(),
             "preview_hash": self.preview()["preview_hash"],
             "file_inventory": sorted(self.blender_handoff.get("package_files", [])),
+            "package_hashes": {path: value.get("sha256") for path, value in sorted(self.blender_handoff.get("file_inventory", {}).items())
+                               if value.get("sha256")},
+            "tool_versions": {key: self.blender_handoff.get(key, "unknown") for key in
+                              ("repository", "tool_version", "blender_version", "game_build")},
+            "provenance": {"source_guids": list(self.blender_handoff.get("source_guids", [])),
+                           "validation_state": self.blender_handoff.get("validation_state", "unverified"),
+                           "inventory_state": self.blender_handoff.get("inventory_state", "unverified")},
             "checklist": self.export_checklist(),
         }
         return payload

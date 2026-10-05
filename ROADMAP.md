@@ -110,7 +110,7 @@ validation, recovery snapshots, save/load, and design-only export paths.
      autosave safeguards are included.
 39. [x] Add a compatibility panel for game builds, Blender versions, and
      external-tool versions.
-40. [ ] Add complete export manifests with hashes, file inventories, and
+40. [x] Add complete export manifests with hashes, file inventories, and
      replacement-versus-new-item comparisons.
 41. [x] Add fixture templates for chairs and tables; storage and decorative
      fixtures remain future coverage.
