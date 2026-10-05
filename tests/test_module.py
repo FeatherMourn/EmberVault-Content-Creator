@@ -165,6 +165,15 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertIn("Contradictory evidence requires review.", project.review_issues())
         self.assertFalse(project.export_review()["ready"])
 
+    def test_export_handoff_carries_evidence_state_summary(self):
+        project = create_furniture_project("Handoff Review")
+        project.add_evidence("Observed probe", "offline", state="observed")
+        project.add_evidence("Contradicted probe", "offline", state="contradicted")
+        summary = project.manifest()["evidence_summary"]
+        self.assertEqual(summary["states"], {"contradicted": 1, "observed": 1})
+        self.assertEqual(summary["contradiction_count"], 1)
+        self.assertFalse(summary["review_ready"])
+
     def test_review_state_counts_are_deterministic(self):
         project = create_furniture_project("Evidence States")
         project.add_evidence("Observed", "offline-a", state="observed")

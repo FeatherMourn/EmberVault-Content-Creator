@@ -746,9 +746,13 @@ class FurnitureProject:
     def export_checklist(self) -> list[dict]:
         review = self.export_review()
         compatibility = self.blender_compatibility_report()
+        evidence_states = sorted({record.get("state", "unknown") for record in self.evidence})
+        evidence_detail = f"{len(self.evidence)} evidence record(s) attached; states: {', '.join(evidence_states) or 'none'}."
+        if any(record.get("state") == "contradicted" for record in self.evidence):
+            evidence_detail += " Contradictions require review."
         return [
             {"check": "Project fields", "state": "pass" if not self.validate() else "blocked", "details": "Required project data is valid." if not self.validate() else "Project data needs correction."},
-            {"check": "Evidence review", "state": "pass" if self.evidence and not any(record.get("state") == "contradicted" for record in self.evidence) else "blocked", "details": f"{len(self.evidence)} evidence record(s) attached."},
+            {"check": "Evidence review", "state": "pass" if self.evidence and not any(record.get("state") == "contradicted" for record in self.evidence) else "blocked", "details": evidence_detail},
             {"check": "Compatibility", "state": "warning" if compatibility["state"] in {"unknown", "partial"} else compatibility["state"], "details": "; ".join(compatibility["mismatches"]) or "Recorded offline compatibility is consistent."},
             {"check": "Runtime claims", "state": "blocked", "details": "Runtime behavior is not claimed by a design-only export."},
             {"check": "Design-only boundary", "state": "pass", "details": "Live game files remain untouched."},
@@ -775,6 +779,10 @@ class FurnitureProject:
             "evidence_summary": {
                 "verification": dict(self.verification),
                 "evidence_count": len(self.evidence),
+                "states": {state: sum(1 for record in self.evidence if record.get("state", "unknown") == state)
+                           for state in sorted({record.get("state", "unknown") for record in self.evidence})},
+                "contradiction_count": sum(1 for record in self.evidence if record.get("state") == "contradicted"),
+                "review_ready": not bool(self.review_issues()),
                 "open_questions": [key for key, value in self.verification.items()
                                    if value in {"unverified", "partial"}],
             },
