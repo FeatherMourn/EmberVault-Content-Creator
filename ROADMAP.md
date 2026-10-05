@@ -18,7 +18,9 @@ promotion of research into working game content.
 The read-only Mod Research client now validates the expanded 19-record,
 design-only handoff. It preserves evidence counts, confidence, limitations,
 open questions, contradiction warnings, and an explicit false runtime-approval
-flag. Authoring UI integration remains active work.
+flag. The standalone PySide authoring shell is now verified with dashboard,
+guided workflow, donor and blueprint search, metadata import, preview,
+validation, recovery snapshots, save/load, and design-only export paths.
 
 ## Dependencies
 
@@ -42,12 +44,12 @@ flag. Authoring UI integration remains active work.
 
 ### Content Creator 2.0 — active build sequence
 
-5. [ ] Create and open projects with deterministic project identifiers.
-6. [ ] Build a real project workspace with save, load, autosave, versioning,
+5. [x] Create and open projects with deterministic project identifiers.
+6. [x] Build a real project workspace with save, load, autosave, versioning,
    recovery, and corruption handling.
-7. [ ] Build guided authoring workflows for furniture, buildings, recipes, and
+7. [x] Build guided authoring workflows for furniture, buildings, recipes, and
    assets, while keeping unsupported content types explicit.
-8. [ ] Add donor, recipe, resource, and asset-reference selection with path
+8. [x] Add donor, recipe, resource, and asset-reference selection with path
    safety validation.
 9. [x] Add the initial read-only donor search and resource metadata client from
    Mod Research; UI integration remains active.
@@ -58,10 +60,10 @@ flag. Authoring UI integration remains active work.
     blocked results.
 12. [ ] Add evidence attachment, provenance display, contradiction warnings,
     and open-question tracking.
-13. [ ] Add deterministic previews and a clear separation between design data,
+13. [x] Add deterministic previews and a clear separation between design data,
     runtime plans, and unsupported claims.
 14. [ ] Validate generated EML/package structures without installing them.
-15. [ ] Validate project exports against the shared Content Project Export
+15. [x] Validate project exports against the shared Content Project Export
     contract and sanitize public-facing fields.
 16. [ ] Add import/export compatibility checks and clear, actionable error
     messages.
