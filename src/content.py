@@ -701,10 +701,12 @@ class FurnitureProject:
 
     def export_checklist(self) -> list[dict]:
         review = self.export_review()
+        compatibility = self.blender_compatibility_report()
         return [
             {"check": "Project fields", "state": "pass" if not self.validate() else "blocked", "details": "Required project data is valid." if not self.validate() else "Project data needs correction."},
             {"check": "Evidence review", "state": "pass" if self.evidence and not any(record.get("state") == "contradicted" for record in self.evidence) else "blocked", "details": f"{len(self.evidence)} evidence record(s) attached."},
-            {"check": "Compatibility", "state": "warning" if self.compatibility_warnings() else "pass", "details": "; ".join(self.compatibility_warnings()) or "No recorded compatibility warnings."},
+            {"check": "Compatibility", "state": "warning" if compatibility["state"] in {"unknown", "partial"} else compatibility["state"], "details": "; ".join(compatibility["mismatches"]) or "Recorded offline compatibility is consistent."},
+            {"check": "Runtime claims", "state": "blocked", "details": "Runtime behavior is not claimed by a design-only export."},
             {"check": "Design-only boundary", "state": "pass", "details": "Live game files remain untouched."},
             {"check": "Review readiness", "state": "pass" if review["ready"] else "blocked", "details": "Ready for export." if review["ready"] else "Open: " + " ".join(review["issues"])},
         ]

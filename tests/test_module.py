@@ -209,6 +209,12 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertFalse(review["ready"])
         self.assertIn("Unverified or partial verification areas remain open.", review["issues"])
 
+    def test_export_checklist_blocks_runtime_claims(self):
+        checklist = bed_template().export_checklist()
+        runtime = next(item for item in checklist if item["check"] == "Runtime claims")
+        self.assertEqual(runtime["state"], "blocked")
+        self.assertIn("not claimed", runtime["details"])
+
     def test_export_contract_validation_rejects_live_mutation(self):
         payload = bed_template().manifest()
         payload["live_game_files_touched"] = True

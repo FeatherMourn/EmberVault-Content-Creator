@@ -90,7 +90,7 @@ validation, recovery snapshots, save/load, and design-only export paths.
 29. [ ] Add an explicit offline mode when game resources or external tools are
     unavailable.
 30. [ ] Add structured logs for validation, handoff, export, and recovery.
-31. [ ] Add a review checklist before a package can be marked ready.
+31. [x] Add a review checklist before a package can be marked ready.
 32. [x] Add compatibility warnings for Blender, game-build, and tool-version
     mismatches.
 33. [ ] Build a corpus of valid, invalid, incomplete, and contradictory project
@@ -115,7 +115,7 @@ validation, recovery snapshots, save/load, and design-only export paths.
 41. [x] Add fixture templates for chairs and tables; storage and decorative
      fixtures remain future coverage.
 42. [ ] Add a searchable donor and recipe library backed by Mod Research.
-43. [ ] Add a pre-export review checklist showing verified, unknown, and blocked
+43. [x] Add a pre-export review checklist showing verified, unknown, and blocked
      requirements.
 44. [ ] Add safe import of metadata from previously generated EML-related
      packages without modifying original files.
