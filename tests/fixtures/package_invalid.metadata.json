@@ -1,0 +1,6 @@
+{
+  "manifest_version": 1,
+  "package_name": "unsafe-chair",
+  "files": [{"path": "../mod.json"}],
+  "evidence_state": "blocked"
+}

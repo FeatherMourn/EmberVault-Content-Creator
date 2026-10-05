@@ -93,7 +93,7 @@ validation, recovery snapshots, save/load, and design-only export paths.
 31. [x] Add a review checklist before a package can be marked ready.
 32. [x] Add compatibility warnings for Blender, game-build, and tool-version
     mismatches.
-33. [ ] Build a corpus of valid, invalid, incomplete, and contradictory project
+33. [x] Build a corpus of valid, invalid, incomplete, and contradictory project
     fixtures.
 
 ### Usability, traceability, and release hardening — planned

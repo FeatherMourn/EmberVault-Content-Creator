@@ -1,0 +1,6 @@
+{
+  "manifest_version": 1,
+  "package_name": "offline-chair",
+  "files": [{"path": "mod.json"}, {"path": "validation.json"}],
+  "evidence_state": "verified"
+}

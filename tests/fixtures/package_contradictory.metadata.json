@@ -1,0 +1,7 @@
+{
+  "manifest_version": 1,
+  "package_name": "review-chair",
+  "files": [{"path": "mod.json"}],
+  "evidence_state": "contradicted",
+  "validation_state": "validated"
+}

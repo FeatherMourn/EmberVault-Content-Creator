@@ -369,6 +369,17 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertTrue(validate_crafting_metadata({"recipe_guid": "recipe", "ingredients": [{"guid": "wood", "count": 0}]}))
         self.assertTrue(validate_package_manifest({"manifest_version": 1, "package_name": "chair", "files": [{"path": "../unsafe"}]}))
 
+    def test_package_fixture_corpus_covers_valid_invalid_incomplete_and_contradictory(self):
+        fixture_root = Path(__file__).parent / "fixtures"
+        valid = json.loads((fixture_root / "package_valid.metadata.json").read_text(encoding="utf-8"))
+        invalid = json.loads((fixture_root / "package_invalid.metadata.json").read_text(encoding="utf-8"))
+        incomplete = json.loads((fixture_root / "package_incomplete.metadata.json").read_text(encoding="utf-8"))
+        contradictory = json.loads((fixture_root / "package_contradictory.metadata.json").read_text(encoding="utf-8"))
+        self.assertEqual(validate_package_manifest(valid), [])
+        self.assertTrue(validate_package_manifest(invalid))
+        self.assertTrue(validate_package_manifest(incomplete))
+        self.assertEqual(contradictory["evidence_state"], "contradicted")
+
     def test_registration_simulator_is_static_only(self):
         result = simulate_registration("game.assets.create_resource(source_item.data, 'keen::ItemInfo'); item_registry.data.itemRefs")
         self.assertIn("item_creation", result["actions"])
