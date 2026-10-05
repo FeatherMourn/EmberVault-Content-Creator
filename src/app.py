@@ -10,13 +10,15 @@ from PySide6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QWidget,
 )
 
-from .content import BlueprintLibrary, FurnitureProject, authoring_donor_options, authoring_evidence_summary, authoring_recipe_options, bed_template, import_package_metadata, package_preview
+from .content import BlueprintLibrary, FurnitureProject, authoring_donor_options, authoring_evidence_summary, authoring_recipe_options, bed_template, compare_authoring_records, import_package_metadata, package_preview
 
 
 class ContentCreatorWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.project = FurnitureProject()
+        self.selected_donor_record = None
+        self.selected_recipe_record = None
         self.blueprints = BlueprintLibrary(Path.cwd() / "content-projects" / "blueprints")
         self.setWindowTitle("EmberVault Content Creator")
         self.resize(920, 680)
@@ -56,8 +58,14 @@ class ContentCreatorWindow(QMainWindow):
         library_layout.addWidget(self.donor_results)
         self.recipe_results = QListWidget()
         self.recipe_results.itemClicked.connect(self._select_recipe)
+        compare = QPushButton("Compare selected donor and recipe evidence")
+        compare.clicked.connect(self._compare_selected_records)
         library_layout.addWidget(QLabel("Recipe evidence"))
         library_layout.addWidget(self.recipe_results)
+        library_layout.addWidget(compare)
+        self.record_comparison = QListWidget()
+        self.record_comparison.setMaximumHeight(100)
+        library_layout.addWidget(self.record_comparison)
         layout.addWidget(library)
 
         blueprints = QGroupBox("Blueprint library")
@@ -249,6 +257,7 @@ class ContentCreatorWindow(QMainWindow):
                 self.donor_item.setText(str(record["item_id"]))
             if record["recipe_id"] is not None:
                 self.donor_recipe.setText(str(record["recipe_id"]))
+            self.selected_donor_record = record
             evidence = authoring_evidence_summary(record)
             self.status.setText(f"Selected {evidence['subject']} from {evidence['source']}; offline evidence, runtime unverified.")
             return
@@ -258,9 +267,23 @@ class ContentCreatorWindow(QMainWindow):
         for record in authoring_recipe_options("", self.donor_category.currentText() if self.donor_category.currentText() != "all" else ""):
             if record["name"] in selected:
                 self.donor_recipe.setText(str(record["recipe_id"]))
+                self.selected_recipe_record = record
                 evidence = authoring_evidence_summary(record, "recipe")
                 self.status.setText(f"Selected {evidence['subject']} from {evidence['source']}; offline evidence, runtime unverified.")
                 return
+
+    def _compare_selected_records(self) -> None:
+        self.record_comparison.clear()
+        if not self.selected_donor_record or not self.selected_recipe_record:
+            self.record_comparison.addItem("Select a donor and recipe record first.")
+            return
+        comparison = compare_authoring_records(self.selected_donor_record, self.selected_recipe_record)
+        self.record_comparison.addItem("Comparison: offline evidence only; runtime behavior unverified.")
+        self.record_comparison.addItem(f"Same category: {comparison['same_category']}")
+        for field, values in comparison["differences"].items():
+            self.record_comparison.addItem(f"{field}: {values['left']} → {values['right']}")
+        if not comparison["differences"]:
+            self.record_comparison.addItem("No recorded identity or provenance differences.")
 
     def _search_blueprints(self, query: str) -> None:
         self.blueprint_results.clear()
