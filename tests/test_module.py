@@ -442,6 +442,12 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertNotIn("private", json.dumps(record).lower())
         self.assertNotIn("contradictory probe", json.dumps(record).lower())
 
+    def test_publication_requires_review_ready_and_verified_package(self):
+        with TemporaryDirectory() as folder:
+            project = create_furniture_project("Blocked Publication")
+            with self.assertRaisesRegex(ValueError, "publication requires review-ready evidence"):
+                BlueprintLibrary(Path(folder)).publish_record(project, Path(folder) / "public.json")
+
     def test_blueprint_library_filters_by_evidence_state(self):
         with TemporaryDirectory() as folder:
             library = BlueprintLibrary(Path(folder))

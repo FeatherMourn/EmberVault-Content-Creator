@@ -403,6 +403,10 @@ class BlueprintLibrary:
     def publish_record(self, project: "FurnitureProject", destination: Path) -> Path:
         record = self.public_record(project)
         issues = self.validate_public_record(record)
+        if project.review_issues():
+            issues.append("publication requires review-ready evidence")
+        if project.compatibility_panel()["package_compatibility"] != "verified":
+            issues.append("publication requires verified package compatibility")
         if issues:
             raise ValueError("Public record invalid: " + " ".join(issues))
         destination = Path(destination)
