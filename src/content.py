@@ -639,6 +639,18 @@ class FurnitureProject:
             "game_build": handoff.get("game_build", "unknown"),
         }, "read_only": True, "runtime_testing": "not_started"}
 
+    def compatibility_panel(self) -> dict:
+        """Return a deterministic, display-safe compatibility panel payload."""
+        handoff = self.blender_handoff
+        report = self.blender_compatibility_report()
+        return {"panel_version": 1, "state": report["state"],
+                "recorded": report.get("recorded", {}),
+                "mismatches": list(report.get("mismatches", [])),
+                "package_validation": handoff.get("validation_state", "unverified") if handoff else "unverified",
+                "package_inventory": handoff.get("inventory_state", "unverified") if handoff else "unverified",
+                "runtime_testing": "not_started", "read_only": True,
+                "mutates_workspace": False}
+
     def add_resource_metadata(self, resource_type: str, resource_id: str, source: str) -> None:
         record = {"resource_type": resource_type.strip(), "resource_id": resource_id.strip(), "source": source.strip()}
         if not all(record.values()):

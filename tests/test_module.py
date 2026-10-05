@@ -198,6 +198,15 @@ class ContentCreatorTests(unittest.TestCase):
         report = create_furniture_project("No handoff").blender_compatibility_report()
         self.assertEqual(report["state"], "unknown")
 
+    def test_compatibility_panel_is_display_safe(self):
+        project = create_furniture_project("Panel")
+        project.set_blender_handoff("repo", "tool-1", "blender-5", "build-1", ["guid"], ["mod.json"])
+        panel = project.compatibility_panel()
+        self.assertEqual(panel["panel_version"], 1)
+        self.assertEqual(panel["state"], "verified")
+        self.assertEqual(panel["runtime_testing"], "not_started")
+        self.assertTrue(panel["read_only"])
+
     def test_preview_is_deterministic_and_design_only(self):
         project = bed_template()
         first, second = project.preview(), project.preview()

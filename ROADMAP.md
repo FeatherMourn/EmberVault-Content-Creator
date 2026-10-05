@@ -108,7 +108,7 @@ validation, recovery snapshots, save/load, and design-only export paths.
      confidence levels.
 38. [x] Add automatic project snapshots, recovery history, undo, and redo;
      autosave safeguards are included.
-39. [ ] Add a compatibility panel for game builds, Blender versions, and
+39. [x] Add a compatibility panel for game builds, Blender versions, and
      external-tool versions.
 40. [ ] Add complete export manifests with hashes, file inventories, and
      replacement-versus-new-item comparisons.
