@@ -37,6 +37,20 @@
         "state": "partial",
         "game_build": "1076226",
         "evidence_scope": "offline package preparation"
+      },
+      {
+        "title": "Mod Research donor item record",
+        "source": "candidate.item.2940001508 \u00b7 build 1076226",
+        "state": "partial",
+        "evidence_path": "research/promoted/2026-10-04/research__source__mods-drive__Control_Center__research__FULL_ICON_MODEL_BED_PROBE_EVIDENCE_20260927.md",
+        "limitation": "Does not establish universal donor suitability or runtime behavior"
+      },
+      {
+        "title": "Mod Research donor recipe record",
+        "source": "candidate.recipe.3531872774 \u00b7 build 1076226",
+        "state": "blocked",
+        "evidence_path": "research/promoted/2026-10-04/research__source__mods-drive__Control_Center__research__FULL_ICON_MODEL_BED_PROBE_EVIDENCE_20260927.md",
+        "limitation": "Recipe resolution and UI route remain unverified"
       }
     ],
     "blender_handoff": {

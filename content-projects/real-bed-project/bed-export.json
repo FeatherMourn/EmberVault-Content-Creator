@@ -40,6 +40,20 @@
         "state": "partial",
         "game_build": "1076226",
         "evidence_scope": "offline package preparation"
+      },
+      {
+        "title": "Mod Research donor item record",
+        "source": "candidate.item.2940001508 \u00b7 build 1076226",
+        "state": "partial",
+        "evidence_path": "research/promoted/2026-10-04/research__source__mods-drive__Control_Center__research__FULL_ICON_MODEL_BED_PROBE_EVIDENCE_20260927.md",
+        "limitation": "Does not establish universal donor suitability or runtime behavior"
+      },
+      {
+        "title": "Mod Research donor recipe record",
+        "source": "candidate.recipe.3531872774 \u00b7 build 1076226",
+        "state": "blocked",
+        "evidence_path": "research/promoted/2026-10-04/research__source__mods-drive__Control_Center__research__FULL_ICON_MODEL_BED_PROBE_EVIDENCE_20260927.md",
+        "limitation": "Recipe resolution and UI route remain unverified"
       }
     ],
     "blender_handoff": {
@@ -108,9 +122,10 @@
       "persistence": "unverified",
       "multiplayer": "unverified"
     },
-    "evidence_count": 2,
+    "evidence_count": 4,
     "states": {
-      "partial": 2
+      "blocked": 1,
+      "partial": 3
     },
     "contradiction_count": 0,
     "review_ready": false,
@@ -135,12 +150,26 @@
       "state": "partial",
       "game_build": "1076226",
       "evidence_scope": "offline package preparation"
+    },
+    {
+      "title": "Mod Research donor item record",
+      "source": "candidate.item.2940001508 \u00b7 build 1076226",
+      "state": "partial",
+      "evidence_path": "research/promoted/2026-10-04/research__source__mods-drive__Control_Center__research__FULL_ICON_MODEL_BED_PROBE_EVIDENCE_20260927.md",
+      "limitation": "Does not establish universal donor suitability or runtime behavior"
+    },
+    {
+      "title": "Mod Research donor recipe record",
+      "source": "candidate.recipe.3531872774 \u00b7 build 1076226",
+      "state": "blocked",
+      "evidence_path": "research/promoted/2026-10-04/research__source__mods-drive__Control_Center__research__FULL_ICON_MODEL_BED_PROBE_EVIDENCE_20260927.md",
+      "limitation": "Recipe resolution and UI route remain unverified"
     }
   ],
   "live_game_files_touched": false,
   "export_metadata": {
-    "project_hash": "3d855ba036d06415c5b763a5a2bd6b48ce1e07e62b3e9ae975ed07a39d32a7ca",
-    "preview_hash": "7e491ba5ccf46fb844d4e86dda9355159cebc84add1b86d62864d525abc84c77",
+    "project_hash": "cff59979e51d5332e972a4c611a8035fcee760f07ec08a4df5ea8e4509aad323",
+    "preview_hash": "8b8408bd16e4fc96b94bdb1939cfbce15f91cee4e72312275ea4cb7216430a2f",
     "file_inventory": [
       "mod.json",
       "render_data.bin",
@@ -176,7 +205,7 @@
       {
         "check": "Evidence review",
         "state": "pass",
-        "details": "2 evidence record(s) attached; states: partial."
+        "details": "4 evidence record(s) attached; states: blocked, partial."
       },
       {
         "check": "Compatibility",
