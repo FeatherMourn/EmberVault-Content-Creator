@@ -54,6 +54,14 @@
         "state": "blocked",
         "evidence_path": "research/promoted/2026-10-04/research__source__mods-drive__Control_Center__research__FULL_ICON_MODEL_BED_PROBE_EVIDENCE_20260927.md",
         "limitation": "Recipe resolution and UI route remain unverified"
+      },
+      {
+        "title": "Offline recipe catalog lookup",
+        "source": "EmberVault Mod Research authoritative catalog search",
+        "state": "blocked",
+        "query": "3531872774",
+        "build_scope": "1076226",
+        "limitation": "No normalized same-build recipe record was found; occurrences are limited to probe setup scripts"
       }
     ],
     "blender_handoff": {
@@ -122,9 +130,9 @@
       "persistence": "unverified",
       "multiplayer": "unverified"
     },
-    "evidence_count": 4,
+    "evidence_count": 5,
     "states": {
-      "blocked": 1,
+      "blocked": 2,
       "partial": 3
     },
     "contradiction_count": 0,
@@ -164,12 +172,20 @@
       "state": "blocked",
       "evidence_path": "research/promoted/2026-10-04/research__source__mods-drive__Control_Center__research__FULL_ICON_MODEL_BED_PROBE_EVIDENCE_20260927.md",
       "limitation": "Recipe resolution and UI route remain unverified"
+    },
+    {
+      "title": "Offline recipe catalog lookup",
+      "source": "EmberVault Mod Research authoritative catalog search",
+      "state": "blocked",
+      "query": "3531872774",
+      "build_scope": "1076226",
+      "limitation": "No normalized same-build recipe record was found; occurrences are limited to probe setup scripts"
     }
   ],
   "live_game_files_touched": false,
   "export_metadata": {
-    "project_hash": "cff59979e51d5332e972a4c611a8035fcee760f07ec08a4df5ea8e4509aad323",
-    "preview_hash": "8b8408bd16e4fc96b94bdb1939cfbce15f91cee4e72312275ea4cb7216430a2f",
+    "project_hash": "3fb171f0d5d7660215a07f8e036369838e149d2a9b0d420f6e3501289ba58ea1",
+    "preview_hash": "fdf92caa41348727b85f9b2f52d65faf94735a4f0def72ada269cebbb7079092",
     "file_inventory": [
       "mod.json",
       "render_data.bin",
@@ -205,7 +221,7 @@
       {
         "check": "Evidence review",
         "state": "pass",
-        "details": "4 evidence record(s) attached; states: blocked, partial."
+        "details": "5 evidence record(s) attached; states: blocked, partial."
       },
       {
         "check": "Compatibility",
