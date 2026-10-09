@@ -1,0 +1,68 @@
+{
+  "project_schema_version": 1,
+  "project_id": "cc-fad4fa43d277409c9a0ba397cd2c351e",
+  "content_type": "furniture",
+  "project": {
+    "project_id": "cc-fad4fa43d277409c9a0ba397cd2c351e",
+    "name": "New Bed Design",
+    "description": "Furniture based on the proven in-game bed workflow.",
+    "category": "bed",
+    "width": 2.0,
+    "height": 1.0,
+    "depth": 3.0,
+    "materials": [
+      "wood",
+      "fabric"
+    ],
+    "asset_references": [],
+    "source_template": "tested-bed-workflow",
+    "donor_item_id": 2940001508,
+    "donor_recipe_id": 3531872774,
+    "clone_item_id": null,
+    "clone_recipe_id": null,
+    "workflow_mode": "replacement",
+    "target_model_guid": "",
+    "base_template_guid": "",
+    "base_item_guid": "",
+    "evidence": [
+      {
+        "title": "Controlled bed registration probe",
+        "source": "EmberVault furniture-clone-registration research",
+        "scope": "independent ItemInfo and recipe registration route",
+        "state": "partial"
+      },
+      {
+        "title": "Bed donor and Blender handoff",
+        "source": "EmberVault bed workflow and EnshroudedBlenderTools",
+        "state": "partial",
+        "game_build": "1076226",
+        "evidence_scope": "offline package preparation"
+      }
+    ],
+    "blender_handoff": {
+      "repository": "https://github.com/Baik90/EnshroudedBlenderTools",
+      "tool_version": "0.25.0",
+      "blender_version": "5.2 LTS",
+      "game_build": "1076226",
+      "source_guids": [
+        "bed-render-model"
+      ],
+      "package_files": [
+        "mod.json",
+        "validation.json",
+        "render_data.bin",
+        "src/mod.lua"
+      ],
+      "validation_state": "validated"
+    },
+    "history": [],
+    "verification": {
+      "registration": "verified",
+      "visuals": "unverified",
+      "ui_linkage": "unverified",
+      "placement": "unverified",
+      "persistence": "unverified",
+      "multiplayer": "unverified"
+    }
+  }
+}

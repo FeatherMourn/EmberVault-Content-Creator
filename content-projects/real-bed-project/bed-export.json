@@ -1,0 +1,180 @@
+{
+  "manifest_version": 1,
+  "schema_version": 1,
+  "schema_id": "https://embervault.dev/contracts/content-project-export.schema.json",
+  "application": "EmberVault Content Creator",
+  "application_state": "design-only",
+  "content_type": "furniture",
+  "project": {
+    "project_id": "cc-fad4fa43d277409c9a0ba397cd2c351e",
+    "name": "New Bed Design",
+    "description": "Furniture based on the proven in-game bed workflow.",
+    "category": "bed",
+    "width": 2.0,
+    "height": 1.0,
+    "depth": 3.0,
+    "materials": [
+      "wood",
+      "fabric"
+    ],
+    "asset_references": [],
+    "source_template": "tested-bed-workflow",
+    "donor_item_id": 2940001508,
+    "donor_recipe_id": 3531872774,
+    "clone_item_id": null,
+    "clone_recipe_id": null,
+    "workflow_mode": "replacement",
+    "target_model_guid": "",
+    "base_template_guid": "",
+    "base_item_guid": "",
+    "evidence": [
+      {
+        "title": "Controlled bed registration probe",
+        "source": "EmberVault furniture-clone-registration research",
+        "scope": "independent ItemInfo and recipe registration route",
+        "state": "partial"
+      },
+      {
+        "title": "Bed donor and Blender handoff",
+        "source": "EmberVault bed workflow and EnshroudedBlenderTools",
+        "state": "partial",
+        "game_build": "1076226",
+        "evidence_scope": "offline package preparation"
+      }
+    ],
+    "blender_handoff": {
+      "repository": "https://github.com/Baik90/EnshroudedBlenderTools",
+      "tool_version": "0.25.0",
+      "blender_version": "5.2 LTS",
+      "game_build": "1076226",
+      "source_guids": [
+        "bed-render-model"
+      ],
+      "package_files": [
+        "mod.json",
+        "validation.json",
+        "render_data.bin",
+        "src/mod.lua"
+      ],
+      "validation_state": "validated"
+    },
+    "history": [],
+    "verification": {
+      "registration": "verified",
+      "visuals": "unverified",
+      "ui_linkage": "unverified",
+      "placement": "unverified",
+      "persistence": "unverified",
+      "multiplayer": "unverified"
+    }
+  },
+  "runtime_plan": {
+    "strategy": "vanilla-replacement",
+    "donor_item_id": 2940001508,
+    "donor_recipe_id": 3531872774,
+    "clone_item_id": null,
+    "clone_recipe_id": null,
+    "requires_build_validation": true
+  },
+  "evidence_summary": {
+    "verification": {
+      "registration": "verified",
+      "visuals": "unverified",
+      "ui_linkage": "unverified",
+      "placement": "unverified",
+      "persistence": "unverified",
+      "multiplayer": "unverified"
+    },
+    "evidence_count": 2,
+    "states": {
+      "partial": 2
+    },
+    "contradiction_count": 0,
+    "review_ready": false,
+    "open_questions": [
+      "visuals",
+      "ui_linkage",
+      "placement",
+      "persistence",
+      "multiplayer"
+    ]
+  },
+  "evidence": [
+    {
+      "title": "Controlled bed registration probe",
+      "source": "EmberVault furniture-clone-registration research",
+      "scope": "independent ItemInfo and recipe registration route",
+      "state": "partial"
+    },
+    {
+      "title": "Bed donor and Blender handoff",
+      "source": "EmberVault bed workflow and EnshroudedBlenderTools",
+      "state": "partial",
+      "game_build": "1076226",
+      "evidence_scope": "offline package preparation"
+    }
+  ],
+  "live_game_files_touched": false,
+  "export_metadata": {
+    "project_hash": "3b5c568d38cbaf42549077bf93ea5acfc918704ca98e056cd22540820d01caf7",
+    "preview_hash": "7e491ba5ccf46fb844d4e86dda9355159cebc84add1b86d62864d525abc84c77",
+    "file_inventory": [
+      "mod.json",
+      "render_data.bin",
+      "src/mod.lua",
+      "validation.json"
+    ],
+    "package_hashes": {},
+    "tool_versions": {
+      "repository": "https://github.com/Baik90/EnshroudedBlenderTools",
+      "tool_version": "0.25.0",
+      "blender_version": "5.2 LTS",
+      "game_build": "1076226"
+    },
+    "provenance": {
+      "source_guids": [
+        "bed-render-model"
+      ],
+      "validation_state": "validated",
+      "inventory_state": "unverified",
+      "package_compatibility": "unknown"
+    },
+    "checklist": [
+      {
+        "check": "Project fields",
+        "state": "pass",
+        "details": "Required project data is valid."
+      },
+      {
+        "check": "Evidence review",
+        "state": "pass",
+        "details": "2 evidence record(s) attached; states: partial."
+      },
+      {
+        "check": "Compatibility",
+        "state": "verified",
+        "details": "Recorded offline compatibility is consistent."
+      },
+      {
+        "check": "Package compatibility",
+        "state": "warning",
+        "details": "Offline package state: unknown; runtime behavior remains unverified."
+      },
+      {
+        "check": "Runtime claims",
+        "state": "blocked",
+        "details": "Runtime behavior is not claimed by a design-only export."
+      },
+      {
+        "check": "Design-only boundary",
+        "state": "pass",
+        "details": "Live game files remain untouched."
+      },
+      {
+        "check": "Review readiness",
+        "state": "blocked",
+        "details": "Open: Unverified or partial verification areas remain open."
+      }
+    ]
+  }
+}
