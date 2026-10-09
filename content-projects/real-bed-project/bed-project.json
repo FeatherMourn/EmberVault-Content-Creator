@@ -53,7 +53,30 @@
         "render_data.bin",
         "src/mod.lua"
       ],
-      "validation_state": "validated"
+      "validation_state": "validated",
+      "file_inventory": {
+        "mod.json": {
+          "state": "present",
+          "size": 252,
+          "sha256": "ae8f3b92a7c782720724b656b2f2d4c82364dcdf49d60256f426fbef4b2206ff"
+        },
+        "validation.json": {
+          "state": "present",
+          "size": 109,
+          "sha256": "dfdbfe5a6eb6473f2881692d3769e5680a51bfe610a5c9b8053d81bbb208e7bf"
+        },
+        "render_data.bin": {
+          "state": "present",
+          "size": 28,
+          "sha256": "80bf708249b45b65c6b905666197f603f748e23dad914927b3bbc7e25a01707e"
+        },
+        "src/mod.lua": {
+          "state": "present",
+          "size": 60,
+          "sha256": "85f692040b81612002f1b84a86a4d42f2234870c2adf783cc9beaba8065a13b1"
+        }
+      },
+      "inventory_state": "complete"
     },
     "history": [],
     "verification": {

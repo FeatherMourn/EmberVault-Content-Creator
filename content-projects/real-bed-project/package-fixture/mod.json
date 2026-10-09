@@ -1,0 +1,11 @@
+{
+  "package_name": "offline-bed-research-fixture",
+  "manifest_version": 1,
+  "files": [
+    {"path": "mod.json"},
+    {"path": "validation.json"},
+    {"path": "render_data.bin"},
+    {"path": "src/mod.lua"}
+  ],
+  "runtime_behavior": "unverified"
+}
