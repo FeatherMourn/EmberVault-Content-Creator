@@ -368,9 +368,11 @@ class BlueprintLibrary:
         issues = project.review_issues()
         preview = project.preview()
         return {
+            "id": project.project_id,
             "record_type": "content-blueprint",
             "record_version": 1,
             "title": project.name,
+            "name": project.name,
             "category": project.category,
             "workflow_mode": project.workflow_mode,
             "description": project.description,
@@ -380,6 +382,7 @@ class BlueprintLibrary:
             "license": "not-declared",
             "preview_hash": preview["preview_hash"],
             "evidence_state": "review-required" if issues else "reviewed",
+            "status": "review-required" if issues else "reviewed",
             "review_issues": issues,
             "compatibility": {
                 "game_build": project.blender_handoff.get("game_build", "unknown"),

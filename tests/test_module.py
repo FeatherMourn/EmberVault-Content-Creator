@@ -432,6 +432,8 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertEqual(BlueprintLibrary.validate_public_record(record), [])
         self.assertEqual(record["authorship_state"], "creator-declared")
         self.assertIn("license", record)
+        self.assertEqual(record["id"], project.project_id)
+        self.assertEqual(record["status"], "review-required")
 
     def test_public_record_preserves_review_required_without_private_evidence(self):
         project = create_furniture_project("Reviewed Boundary")
