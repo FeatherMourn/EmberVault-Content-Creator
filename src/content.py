@@ -44,6 +44,27 @@ def authoring_recipe_options(query: str = "", category: str = "") -> list[dict]:
             for option in authoring_donor_options(query, category) if option["recipe_id"] is not None]
 
 
+def authoring_recipe_options_from_handoff(records: list[dict], query: str = "", build: str = "") -> list[dict]:
+    """Adapt sanitized Mod Research recipe records for design-only authoring."""
+    query = query.strip().lower()
+    options = []
+    for record in records:
+        identity = record.get("identity", {})
+        recipe_id = identity.get("recipe_id")
+        builds = [str(value) for value in record.get("build_scope", [])]
+        haystack = str(record).lower()
+        if recipe_id is None or (build and str(build) not in builds) or (query and query not in haystack):
+            continue
+        options.append({"name": record.get("id", f"recipe-{recipe_id}"), "recipe_id": int(recipe_id),
+                        "category": record.get("category", "unknown"), "source": "Mod Research handoff",
+                        "build_scope": builds, "evidence_state": record.get("status", "unknown"),
+                        "confidence": record.get("confidence", "unknown"),
+                        "limitations": list(record.get("limitations", [])),
+                        "open_questions": list(record.get("open_questions", [])),
+                        "runtime_behavior": "unverified", "recipe_selectable": True})
+    return sorted(options, key=lambda option: (option["recipe_id"], option["name"]))
+
+
 def authoring_evidence_summary(record: dict, subject: str = "donor") -> dict:
     """Summarize provenance for UI review without adding runtime conclusions."""
     if not isinstance(record, dict) or not record.get("source"):

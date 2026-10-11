@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 
 from embervault_sdk import ModuleContext, validate_manifest
 from src.module import validate_design
-from src.content import (BlueprintLibrary, FurnitureProject, authoring_donor_options, authoring_evidence_summary, authoring_recipe_options, bed_template, compare_authoring_records, create_furniture_project,
+from src.content import (BlueprintLibrary, FurnitureProject, authoring_donor_options, authoring_evidence_summary, authoring_recipe_options, authoring_recipe_options_from_handoff, bed_template, compare_authoring_records, create_furniture_project,
                          compare_package_metadata, import_package_metadata,
                          audit_package_security, import_generated_package,
                          prepare_bed_vertical_slice,
@@ -151,6 +151,16 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertEqual(options[0]["recipe_behavior"], "unverified")
         self.assertEqual(options[0]["recipe_identity"]["recipe_id"], 3531872774)
         self.assertEqual(options[0]["recipe_metadata_state"], "complete")
+
+    def test_authoring_consumes_recipe_handoff_without_runtime_promotion(self):
+        options = authoring_recipe_options_from_handoff([{
+            "id": "recipe-1", "identity": {"recipe_id": "3531872774"},
+            "build_scope": ["1076226"], "status": "blocked", "confidence": "bounded",
+            "limitations": ["runtime unverified"], "open_questions": ["resolve recipe"]
+        }], build="1076226")
+        self.assertEqual(options[0]["recipe_id"], 3531872774)
+        self.assertEqual(options[0]["evidence_state"], "blocked")
+        self.assertEqual(options[0]["runtime_behavior"], "unverified")
 
     def test_authoring_evidence_summary_preserves_provenance_and_limits(self):
         record = authoring_recipe_options(category="bed")[0]
