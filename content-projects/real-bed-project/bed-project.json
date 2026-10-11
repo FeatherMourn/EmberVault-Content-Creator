@@ -59,6 +59,16 @@
         "query": "3531872774",
         "build_scope": "1076226",
         "limitation": "No normalized same-build recipe record was found; occurrences are limited to probe setup scripts"
+      },
+      {
+        "title": "Normalized KFC3 recipe record",
+        "source": "EmberVault Mod Research candidate.recipe.3531872774",
+        "state": "partial",
+        "build_scope": "1076226",
+        "recipe_guid": "314aa32d-0e61-43b1-9e13-03ae66dba3c1",
+        "output_item_id": "2940001508",
+        "source_sha256": "097c7ddca2e82a44678d8ff7b229c4cbf3243e44182cee215ea0a5cd20517293",
+        "limitation": "Offline metadata resolves identity only; UI, unlock, crafting, persistence, and multiplayer remain unverified"
       }
     ],
     "blender_handoff": {

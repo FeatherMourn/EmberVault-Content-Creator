@@ -166,8 +166,8 @@ class ContentCreatorTests(unittest.TestCase):
         payload = json.loads((Path(__file__).parents[1] / "content-projects/research/recipe-handoff-1076226.json").read_text(encoding="utf-8"))
         options = authoring_recipe_options_from_handoff(payload["records"], build="1076226")
         self.assertEqual(options[0]["recipe_id"], 3531872774)
-        self.assertEqual(options[0]["evidence_state"], "blocked")
-        self.assertEqual(options[0]["open_questions"], ["Can the donor recipe be resolved from the same-build catalog before UI registration?"])
+        self.assertEqual(options[0]["evidence_state"], "partially-verified")
+        self.assertEqual(options[0]["open_questions"], ["Which runtime consumer resolves the recipe knowledge requirement and catalog presentation?"])
         self.assertEqual(options[0]["runtime_behavior"], "unverified")
 
     def test_authoring_evidence_summary_preserves_provenance_and_limits(self):

@@ -62,6 +62,16 @@
         "query": "3531872774",
         "build_scope": "1076226",
         "limitation": "No normalized same-build recipe record was found; occurrences are limited to probe setup scripts"
+      },
+      {
+        "title": "Normalized KFC3 recipe record",
+        "source": "EmberVault Mod Research candidate.recipe.3531872774",
+        "state": "partial",
+        "build_scope": "1076226",
+        "recipe_guid": "314aa32d-0e61-43b1-9e13-03ae66dba3c1",
+        "output_item_id": "2940001508",
+        "source_sha256": "097c7ddca2e82a44678d8ff7b229c4cbf3243e44182cee215ea0a5cd20517293",
+        "limitation": "Offline metadata resolves identity only; UI, unlock, crafting, persistence, and multiplayer remain unverified"
       }
     ],
     "blender_handoff": {
@@ -130,10 +140,10 @@
       "persistence": "unverified",
       "multiplayer": "unverified"
     },
-    "evidence_count": 5,
+    "evidence_count": 6,
     "states": {
       "blocked": 2,
-      "partial": 3
+      "partial": 4
     },
     "contradiction_count": 0,
     "review_ready": false,
@@ -180,12 +190,22 @@
       "query": "3531872774",
       "build_scope": "1076226",
       "limitation": "No normalized same-build recipe record was found; occurrences are limited to probe setup scripts"
+    },
+    {
+      "title": "Normalized KFC3 recipe record",
+      "source": "EmberVault Mod Research candidate.recipe.3531872774",
+      "state": "partial",
+      "build_scope": "1076226",
+      "recipe_guid": "314aa32d-0e61-43b1-9e13-03ae66dba3c1",
+      "output_item_id": "2940001508",
+      "source_sha256": "097c7ddca2e82a44678d8ff7b229c4cbf3243e44182cee215ea0a5cd20517293",
+      "limitation": "Offline metadata resolves identity only; UI, unlock, crafting, persistence, and multiplayer remain unverified"
     }
   ],
   "live_game_files_touched": false,
   "export_metadata": {
-    "project_hash": "3fb171f0d5d7660215a07f8e036369838e149d2a9b0d420f6e3501289ba58ea1",
-    "preview_hash": "fdf92caa41348727b85f9b2f52d65faf94735a4f0def72ada269cebbb7079092",
+    "project_hash": "d2d15ab32462575c77a07b5ba9f23bcf312bb1b1679e544a6dfbb0b6a1fd3418",
+    "preview_hash": "7fdfacbfcf89ec60adb78c9acda57af617ca7653e6409c6b1efe1705a69fd621",
     "file_inventory": [
       "mod.json",
       "render_data.bin",
@@ -221,7 +241,7 @@
       {
         "check": "Evidence review",
         "state": "pass",
-        "details": "5 evidence record(s) attached; states: blocked, partial."
+        "details": "6 evidence record(s) attached; states: blocked, partial."
       },
       {
         "check": "Compatibility",
