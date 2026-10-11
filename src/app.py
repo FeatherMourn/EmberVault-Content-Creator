@@ -1,6 +1,7 @@
 """The standalone EmberVault Content Creator application."""
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -10,7 +11,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QWidget,
 )
 
-from .content import BlueprintLibrary, FurnitureProject, authoring_donor_options, authoring_evidence_summary, authoring_recipe_options, bed_template, compare_authoring_records, import_package_metadata, package_preview
+from .content import BlueprintLibrary, FurnitureProject, authoring_donor_options, authoring_evidence_summary, authoring_recipe_options, authoring_recipe_options_from_handoff, bed_template, compare_authoring_records, import_package_metadata, package_preview
 
 
 class ContentCreatorWindow(QMainWindow):
@@ -19,6 +20,7 @@ class ContentCreatorWindow(QMainWindow):
         self.project = FurnitureProject()
         self.selected_donor_record = None
         self.selected_recipe_record = None
+        self.research_recipe_records = self._load_research_recipe_handoff()
         self.blueprints = BlueprintLibrary(Path.cwd() / "content-projects" / "blueprints")
         self.setWindowTitle("EmberVault Content Creator")
         self.resize(920, 680)
@@ -175,6 +177,17 @@ class ContentCreatorWindow(QMainWindow):
         field = QDoubleSpinBox(); field.setRange(0.01, 1000.0); field.setValue(value); field.setSingleStep(0.1)
         return field
 
+    @staticmethod
+    def _load_research_recipe_handoff() -> list[dict]:
+        path = Path.cwd() / "content-projects" / "research" / "recipe-handoff-1076226.json"
+        if not path.is_file():
+            return []
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return []
+        return payload.get("records", []) if isinstance(payload, dict) else []
+
     def load_bed_template(self) -> None:
         self.project = bed_template()
         self.name.setText(self.project.name); self.description.setText(self.project.description)
@@ -244,6 +257,8 @@ class ContentCreatorWindow(QMainWindow):
         self.recipe_results.clear()
         for record in authoring_recipe_options(query, category):
             self.recipe_results.addItem(f"{record['name']} · recipe {record['recipe_id']} · offline evidence · runtime unverified")
+        for record in authoring_recipe_options_from_handoff(self.research_recipe_records, query, "1076226"):
+            self.recipe_results.addItem(f"{record['name']} · recipe {record['recipe_id']} · {record['evidence_state']} · build 1076226 · review only")
 
     def _select_donor(self, item) -> None:
         selected = item.text()
@@ -270,6 +285,12 @@ class ContentCreatorWindow(QMainWindow):
                 self.selected_recipe_record = record
                 evidence = authoring_evidence_summary(record, "recipe")
                 self.status.setText(f"Selected {evidence['subject']} from {evidence['source']}; offline evidence, runtime unverified.")
+                return
+        for record in authoring_recipe_options_from_handoff(self.research_recipe_records, "", "1076226"):
+            if record["name"] in selected:
+                self.selected_recipe_record = record
+                self.donor_recipe.setText(str(record["recipe_id"]))
+                self.status.setText(f"Selected research recipe {record['recipe_id']}; status {record['evidence_state']}; review only, runtime unverified.")
                 return
 
     def _compare_selected_records(self) -> None:
