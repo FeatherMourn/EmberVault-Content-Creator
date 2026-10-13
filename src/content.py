@@ -220,6 +220,35 @@ def package_compatibility_report(metadata: dict, expected_versions: dict | None 
             "read_only": True, "runtime_testing": "not_started"}
 
 
+def external_tool_compatibility_report(external_metadata: dict, contract_metadata: dict) -> dict:
+    """Compare external tool metadata without executing or installing the tool."""
+    required = ("manifest", "profile", "settings", "package")
+    matches = []
+    gaps = []
+    for field in required:
+        observed = external_metadata.get(field)
+        expected = contract_metadata.get(field, {})
+        if not isinstance(observed, dict):
+            gaps.append(f"missing external field: {field}")
+            continue
+        missing = sorted(set(expected) - set(observed)) if isinstance(expected, dict) else []
+        if missing:
+            gaps.append(f"{field} missing contract keys: {', '.join(missing)}")
+        else:
+            matches.append(field)
+    return {
+        "tool": external_metadata.get("tool", "external-tool"),
+        "matches": matches,
+        "gaps": gaps,
+        "state": "compatible" if not gaps else "compatible-with-gaps",
+        "read_only": True,
+        "runtime_testing": "not_started",
+        "runtime_approval": False,
+        "limitations": ["Synthetic metadata comparison does not prove runtime compatibility.",
+                         "No external code was executed or installed."],
+    }
+
+
 def import_generated_package(package_root: Path) -> dict:
     """Import generated JSON evidence without executing package code."""
     root = Path(package_root)
