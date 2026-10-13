@@ -524,6 +524,7 @@ class FurnitureProject:
     base_item_guid: str = ""
     evidence: list[dict] = field(default_factory=list)
     blender_handoff: dict = field(default_factory=dict)
+    external_compatibility: dict = field(default_factory=dict)
     history: list[dict] = field(default_factory=list)
     verification: dict[str, str] = field(default_factory=lambda: {
         "registration": "unverified",
@@ -778,8 +779,15 @@ class FurnitureProject:
                 "package_validation": handoff.get("validation_state", "unverified") if handoff else "unverified",
                 "package_inventory": handoff.get("inventory_state", "unverified") if handoff else "unverified",
                 "package_compatibility": package_state,
+                "external_compatibility": dict(self.external_compatibility),
                 "runtime_testing": "not_started", "read_only": True,
                 "mutates_workspace": False}
+
+    def set_external_compatibility(self, report: dict) -> None:
+        """Attach a sanitized external-tool comparison to the project."""
+        if not isinstance(report, dict) or report.get("read_only") is not True:
+            raise ValueError("External compatibility must be a read-only report.")
+        self.external_compatibility = dict(report)
 
     def add_resource_metadata(self, resource_type: str, resource_id: str, source: str) -> None:
         record = {"resource_type": resource_type.strip(), "resource_id": resource_id.strip(), "source": source.strip()}
@@ -854,6 +862,7 @@ class FurnitureProject:
             {"check": "Evidence review", "state": "pass" if self.evidence and not any(record.get("state") == "contradicted" for record in self.evidence) else "blocked", "details": evidence_detail},
             {"check": "Compatibility", "state": "warning" if compatibility["state"] in {"unknown", "partial"} else compatibility["state"], "details": "; ".join(compatibility["mismatches"]) or "Recorded offline compatibility is consistent."},
             {"check": "Package compatibility", "state": "pass" if package_state == "verified" else ("blocked" if package_state == "blocked" else "warning"), "details": f"Offline package state: {package_state}; runtime behavior remains unverified."},
+            {"check": "External tool compatibility", "state": "pass" if self.external_compatibility.get("state") == "compatible" else ("warning" if self.external_compatibility else "not_applicable"), "details": "; ".join(self.external_compatibility.get("gaps", [])) or ("Recorded external metadata is compatible." if self.external_compatibility else "No external tool comparison attached.")},
             {"check": "Runtime claims", "state": "blocked", "details": "Runtime behavior is not claimed by a design-only export."},
             {"check": "Design-only boundary", "state": "pass", "details": "Live game files remain untouched."},
             {"check": "Review readiness", "state": "pass" if review["ready"] else "blocked", "details": "Ready for export." if review["ready"] else "Open: " + " ".join(review["issues"])},
@@ -887,6 +896,7 @@ class FurnitureProject:
                                    if value in {"unverified", "partial"}],
             },
             "evidence": list(self.evidence),
+            "external_compatibility": dict(self.external_compatibility),
             "live_game_files_touched": False,
         }
         encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
@@ -901,7 +911,8 @@ class FurnitureProject:
             "provenance": {"source_guids": list(self.blender_handoff.get("source_guids", [])),
                            "validation_state": self.blender_handoff.get("validation_state", "unverified"),
                            "inventory_state": self.blender_handoff.get("inventory_state", "unverified"),
-                           "package_compatibility": self.compatibility_panel()["package_compatibility"]},
+                           "package_compatibility": self.compatibility_panel()["package_compatibility"],
+                           "external_compatibility": dict(self.external_compatibility)},
             "checklist": self.export_checklist(),
         }
         return payload

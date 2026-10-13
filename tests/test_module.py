@@ -280,6 +280,18 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertEqual(panel["state"], "verified")
         self.assertEqual(panel["runtime_testing"], "not_started")
         self.assertTrue(panel["read_only"])
+
+    def test_shroudforge_report_flows_to_panel_checklist_and_export(self):
+        project = create_furniture_project("ShroudForge comparison")
+        report = {"tool": "ShroudForge 1.6.6", "state": "compatible-with-gaps", "gaps": ["package missing contract keys: hash"], "read_only": True, "runtime_approval": False, "runtime_testing": "not_started"}
+        project.set_external_compatibility(report)
+        panel = project.compatibility_panel()
+        self.assertEqual(panel["external_compatibility"]["tool"], "ShroudForge 1.6.6")
+        checklist = project.export_checklist()
+        external = next(item for item in checklist if item["check"] == "External tool compatibility")
+        self.assertEqual(external["state"], "warning")
+        self.assertIn("hash", external["details"])
+        self.assertEqual(project.manifest()["export_metadata"]["provenance"]["external_compatibility"]["runtime_approval"], False)
         self.assertEqual(panel["package_compatibility"], "unknown")
 
     def test_preview_is_deterministic_and_design_only(self):
