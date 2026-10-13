@@ -13,7 +13,7 @@ from src.content import (BlueprintLibrary, FurnitureProject, authoring_donor_opt
                          simulate_registration, validate_guid_collisions,
                          package_preview, capability_matrix,
                          validate_crafting_metadata, validate_package_manifest, package_compatibility_report,
-                         external_tool_compatibility_report)
+                         external_tool_compatibility_report, external_capability_warnings)
 
 
 class ContentCreatorTests(unittest.TestCase):
@@ -442,6 +442,21 @@ class ContentCreatorTests(unittest.TestCase):
         self.assertTrue(report["read_only"])
         self.assertFalse(report["runtime_approval"])
         self.assertEqual(report["runtime_testing"], "not_started")
+
+    def test_shroudforge_capability_warnings_reach_panel_and_checklist(self):
+        matrix = {"schema_version": 1, "runtime_approval": False, "capabilities": [
+            {"area": "runtime-hooks", "external_state": "beta", "evidence_boundary": "Runtime unverified."},
+            {"area": "build-profiles", "external_state": "proven", "evidence_boundary": "External documentation."},
+        ]}
+        project = create_furniture_project("Capability warning")
+        project.set_external_compatibility({"state": "compatible", "read_only": True,
+                                             "runtime_approval": False,
+                                             "capability_warnings": external_capability_warnings(matrix)})
+        panel = project.compatibility_panel()
+        self.assertEqual(len(panel["capability_warnings"]), 1)
+        checklist = next(item for item in project.export_checklist() if item["check"] == "External tool compatibility")
+        self.assertEqual(checklist["state"], "warning")
+        self.assertIn("runtime-hooks", checklist["details"])
 
     def test_registration_simulator_is_static_only(self):
         result = simulate_registration("game.assets.create_resource(source_item.data, 'keen::ItemInfo'); item_registry.data.itemRefs")

@@ -249,6 +249,17 @@ def external_tool_compatibility_report(external_metadata: dict, contract_metadat
     }
 
 
+def external_capability_warnings(matrix: dict) -> list[str]:
+    """Summarize beta/open external capabilities for design-only review."""
+    if not isinstance(matrix, dict) or matrix.get("schema_version") != 1:
+        return ["External capability matrix is unavailable or unsupported."]
+    if matrix.get("runtime_approval") is not False:
+        return ["External capability matrix has an invalid runtime approval state."]
+    return [f"{item.get('area', 'unknown')} is {item.get('external_state', 'unknown')}: {item.get('evidence_boundary', 'review required')}"
+            for item in matrix.get("capabilities", [])
+            if isinstance(item, dict) and item.get("external_state") != "proven"]
+
+
 def import_generated_package(package_root: Path) -> dict:
     """Import generated JSON evidence without executing package code."""
     root = Path(package_root)
@@ -773,6 +784,7 @@ class FurnitureProject:
         handoff = self.blender_handoff
         report = self.blender_compatibility_report()
         package_state = "verified" if handoff and handoff.get("validation_state") == "validated" and handoff.get("inventory_state") == "complete" else ("blocked" if handoff and handoff.get("validation_state") == "incomplete" else "unknown")
+        capability_warnings = list(self.external_compatibility.get("capability_warnings", []))
         return {"panel_version": 1, "state": report["state"],
                 "recorded": report.get("recorded", {}),
                 "mismatches": list(report.get("mismatches", [])),
@@ -780,6 +792,7 @@ class FurnitureProject:
                 "package_inventory": handoff.get("inventory_state", "unverified") if handoff else "unverified",
                 "package_compatibility": package_state,
                 "external_compatibility": dict(self.external_compatibility),
+                "capability_warnings": capability_warnings,
                 "runtime_testing": "not_started", "read_only": True,
                 "mutates_workspace": False}
 
@@ -862,7 +875,7 @@ class FurnitureProject:
             {"check": "Evidence review", "state": "pass" if self.evidence and not any(record.get("state") == "contradicted" for record in self.evidence) else "blocked", "details": evidence_detail},
             {"check": "Compatibility", "state": "warning" if compatibility["state"] in {"unknown", "partial"} else compatibility["state"], "details": "; ".join(compatibility["mismatches"]) or "Recorded offline compatibility is consistent."},
             {"check": "Package compatibility", "state": "pass" if package_state == "verified" else ("blocked" if package_state == "blocked" else "warning"), "details": f"Offline package state: {package_state}; runtime behavior remains unverified."},
-            {"check": "External tool compatibility", "state": "pass" if self.external_compatibility.get("state") == "compatible" else ("warning" if self.external_compatibility else "not_applicable"), "details": "; ".join(self.external_compatibility.get("gaps", [])) or ("Recorded external metadata is compatible." if self.external_compatibility else "No external tool comparison attached.")},
+            {"check": "External tool compatibility", "state": "pass" if self.external_compatibility.get("state") == "compatible" and not self.external_compatibility.get("capability_warnings") else ("warning" if self.external_compatibility else "not_applicable"), "details": "; ".join(self.external_compatibility.get("gaps", []) + self.external_compatibility.get("capability_warnings", [])) or ("Recorded external metadata is compatible." if self.external_compatibility else "No external tool comparison attached.")},
             {"check": "Runtime claims", "state": "blocked", "details": "Runtime behavior is not claimed by a design-only export."},
             {"check": "Design-only boundary", "state": "pass", "details": "Live game files remain untouched."},
             {"check": "Review readiness", "state": "pass" if review["ready"] else "blocked", "details": "Ready for export." if review["ready"] else "Open: " + " ".join(review["issues"])},
