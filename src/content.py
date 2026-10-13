@@ -260,6 +260,21 @@ def external_capability_warnings(matrix: dict) -> list[str]:
             if isinstance(item, dict) and item.get("external_state") != "proven"]
 
 
+def package_passport_review(passport: dict) -> dict:
+    """Validate a Mod Package Passport without executing package contents."""
+    required = ("id", "version", "builds", "targets", "files", "dependencies", "evidence")
+    issues = [f"missing:{key}" for key in required if key not in passport]
+    if passport.get("read_only") is not True:
+        issues.append("passport must be read-only")
+    if passport.get("runtime_approval") is not False:
+        issues.append("runtime approval must be false")
+    return {"state": "blocked" if issues else "review-required", "issues": issues,
+            "package_id": passport.get("id", "unknown"), "version": passport.get("version", "unknown"),
+            "builds": list(passport.get("builds", [])) if isinstance(passport.get("builds", []), list) else [],
+            "targets": list(passport.get("targets", [])) if isinstance(passport.get("targets", []), list) else [],
+            "read_only": True, "executes_package": False, "runtime_approval": False}
+
+
 def import_generated_package(package_root: Path) -> dict:
     """Import generated JSON evidence without executing package code."""
     root = Path(package_root)
@@ -785,6 +800,7 @@ class FurnitureProject:
         report = self.blender_compatibility_report()
         package_state = "verified" if handoff and handoff.get("validation_state") == "validated" and handoff.get("inventory_state") == "complete" else ("blocked" if handoff and handoff.get("validation_state") == "incomplete" else "unknown")
         capability_warnings = list(self.external_compatibility.get("capability_warnings", []))
+        passport = self.external_compatibility.get("package_passport", {})
         return {"panel_version": 1, "state": report["state"],
                 "recorded": report.get("recorded", {}),
                 "mismatches": list(report.get("mismatches", [])),
@@ -793,6 +809,7 @@ class FurnitureProject:
                 "package_compatibility": package_state,
                 "external_compatibility": dict(self.external_compatibility),
                 "capability_warnings": capability_warnings,
+                "package_passport": dict(passport),
                 "runtime_testing": "not_started", "read_only": True,
                 "mutates_workspace": False}
 
@@ -801,6 +818,10 @@ class FurnitureProject:
         if not isinstance(report, dict) or report.get("read_only") is not True:
             raise ValueError("External compatibility must be a read-only report.")
         self.external_compatibility = dict(report)
+
+    def set_package_passport(self, passport: dict) -> None:
+        """Attach a read-only Mod Package Passport review to the project."""
+        self.external_compatibility["package_passport"] = package_passport_review(passport)
 
     def add_resource_metadata(self, resource_type: str, resource_id: str, source: str) -> None:
         record = {"resource_type": resource_type.strip(), "resource_id": resource_id.strip(), "source": source.strip()}
@@ -876,6 +897,7 @@ class FurnitureProject:
             {"check": "Compatibility", "state": "warning" if compatibility["state"] in {"unknown", "partial"} else compatibility["state"], "details": "; ".join(compatibility["mismatches"]) or "Recorded offline compatibility is consistent."},
             {"check": "Package compatibility", "state": "pass" if package_state == "verified" else ("blocked" if package_state == "blocked" else "warning"), "details": f"Offline package state: {package_state}; runtime behavior remains unverified."},
             {"check": "External tool compatibility", "state": "pass" if self.external_compatibility.get("state") == "compatible" and not self.external_compatibility.get("capability_warnings") else ("warning" if self.external_compatibility else "not_applicable"), "details": "; ".join(self.external_compatibility.get("gaps", []) + self.external_compatibility.get("capability_warnings", [])) or ("Recorded external metadata is compatible." if self.external_compatibility else "No external tool comparison attached.")},
+            {"check": "Mod Package Passport", "state": "blocked" if self.external_compatibility.get("package_passport", {}).get("state") == "blocked" else ("warning" if self.external_compatibility.get("package_passport") else "not_applicable"), "details": "; ".join(self.external_compatibility.get("package_passport", {}).get("issues", [])) or (f"Passport {self.external_compatibility.get('package_passport', {}).get('package_id')} remains review-required." if self.external_compatibility.get("package_passport") else "No package passport attached.")},
             {"check": "Runtime claims", "state": "blocked", "details": "Runtime behavior is not claimed by a design-only export."},
             {"check": "Design-only boundary", "state": "pass", "details": "Live game files remain untouched."},
             {"check": "Review readiness", "state": "pass" if review["ready"] else "blocked", "details": "Ready for export." if review["ready"] else "Open: " + " ".join(review["issues"])},

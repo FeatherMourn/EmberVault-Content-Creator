@@ -13,7 +13,7 @@ from src.content import (BlueprintLibrary, FurnitureProject, authoring_donor_opt
                          simulate_registration, validate_guid_collisions,
                          package_preview, capability_matrix,
                          validate_crafting_metadata, validate_package_manifest, package_compatibility_report,
-                         external_tool_compatibility_report, external_capability_warnings)
+                         external_tool_compatibility_report, external_capability_warnings, package_passport_review)
 
 
 class ContentCreatorTests(unittest.TestCase):
@@ -457,6 +457,17 @@ class ContentCreatorTests(unittest.TestCase):
         checklist = next(item for item in project.export_checklist() if item["check"] == "External tool compatibility")
         self.assertEqual(checklist["state"], "warning")
         self.assertIn("runtime-hooks", checklist["details"])
+
+    def test_package_passport_is_review_required_and_visible(self):
+        passport = {"id": "sf.example", "version": "1.6.6", "builds": ["1076226"],
+                    "targets": ["client"], "files": [], "dependencies": [], "evidence": [],
+                    "read_only": True, "runtime_approval": False}
+        self.assertEqual(package_passport_review(passport)["state"], "review-required")
+        project = create_furniture_project("Passport review")
+        project.set_package_passport(passport)
+        self.assertEqual(project.compatibility_panel()["package_passport"]["package_id"], "sf.example")
+        check = next(item for item in project.export_checklist() if item["check"] == "Mod Package Passport")
+        self.assertEqual(check["state"], "warning")
 
     def test_registration_simulator_is_static_only(self):
         result = simulate_registration("game.assets.create_resource(source_item.data, 'keen::ItemInfo'); item_registry.data.itemRefs")
